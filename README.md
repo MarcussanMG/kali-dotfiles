@@ -10,6 +10,8 @@
 
 ---
 
+> The wallpaper was updated so the GIF is not exactly the same as the repo but the functionality stays the same
+
 <img width="2048" height="856" alt="Kali-i3-workflow" src="https://github.com/user-attachments/assets/07b58550-7786-4954-9d37-3685a029b168" />
 
 ---
