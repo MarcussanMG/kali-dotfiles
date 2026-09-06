@@ -112,7 +112,7 @@ else
 fi
 
 if [[ ! -f "$TOOLS/windows-privesc/PrivescCheck.ps1" ]]; then
-    curl -fsSL "https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1" \
+    curl -fsSL "https://github.com/itm4n/PrivescCheck/releases/latest/download/PrivescCheck.ps1" \
         -o "$TOOLS/windows-privesc/PrivescCheck.ps1" \
         && info "downloaded       PrivescCheck.ps1" \
         || { info "UNAVAILABLE      PrivescCheck.ps1"; missing+=("PrivescCheck.ps1"); }
@@ -342,7 +342,7 @@ else
 fi
 
 if [[ ! -f "$TOOLS/windows-privesc/PrivescCheck.ps1" ]]; then
-    curl -fsSL "https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1" \
+    curl -fsSL "https://github.com/itm4n/PrivescCheck/releases/latest/download/PrivescCheck.ps1" \
         -o "$TOOLS/windows-privesc/PrivescCheck.ps1" \
         && info "downloaded       PrivescCheck.ps1" \
         || { info "UNAVAILABLE      PrivescCheck.ps1"; missing+=("PrivescCheck.ps1"); }
