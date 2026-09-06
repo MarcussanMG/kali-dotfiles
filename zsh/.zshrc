@@ -332,6 +332,27 @@ alias ....='cd ../../..'
 
 # ─── Engagement helpers ────────────────────────────────────────────────
 alias tun='ip -4 -brief address show tun0'
+
+# BloodHound CE (Docker Compose) -- up / down / creds
+BLOODHOUND_COMPOSE="$HOME/tools/ad-exploitation/bloodhound/docker-compose.yml"
+bloodhound() {
+    case "$1" in
+        up)
+            docker compose -f "$BLOODHOUND_COMPOSE" up -d
+            ;;
+        down)
+            docker compose -f "$BLOODHOUND_COMPOSE" down
+            ;;
+        creds)
+            docker compose -f "$BLOODHOUND_COMPOSE" logs bloodhound 2>/dev/null \
+                | grep -i "Initial Password Set To" \
+                || print -P "%F{#f87171}%f no password line found -- container may still be starting, or the password was already rotated"
+            ;;
+        *)
+            print -P "%F{#86efac}Usage:%f bloodhound up|down|creds"
+            ;;
+    esac
+}
 alias myip='ip -4 -brief address show | grep -v " lo "'
 alias ports='ss -tulpn'
 alias serve='python3 -m http.server 80'

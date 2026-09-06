@@ -548,6 +548,26 @@ echo $E     # address of the first physical interface (matches the i3 bar)
 Unlike `$T`, these update on their own as the VPN connects or drops — no need to open a
 new shell.
 
+### BloodHound CE (Docker)
+
+`docker-compose.yml` lives at `~/tools/ad-exploitation/bloodhound/`, installed automatically
+by `bootstrap.sh` along with Docker itself.
+
+```bash
+bloodhound up       # start the stack (postgres, neo4j, bloodhound)
+bloodhound down     # stop it
+bloodhound creds    # print the admin password from the container logs
+```
+
+Log in at `http://localhost:8080/ui/login` with user `admin` and the password from
+`bloodhound creds`. It's a one-time password, printed only on the container's first
+ever start — after logging in you'll be forced to set a new one. If `bloodhound creds`
+comes back empty, the container may still be starting; wait a few seconds and retry.
+
+Common gotcha: `docker compose up` failing with `address already in use` on port `7474`
+or `7687` almost always means a native Neo4j install (not Docker) is already listening
+on that port. Find and stop it with `sudo ss -tulpn | grep 7474` before retrying.
+
 ### Scaffolding a box
 
 ```bash
