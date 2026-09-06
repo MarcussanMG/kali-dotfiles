@@ -197,6 +197,28 @@ else
     info "UNAVAILABLE      powersploit not installed -- PowerView.ps1 skipped"
 fi
 
+# -- BloodHound CE (Docker Compose) --
+if ! command -v docker >/dev/null; then
+    sudo apt-get install -y docker.io docker-compose-plugin >/dev/null 2>&1
+    sudo systemctl enable --now docker >/dev/null 2>&1
+    sudo usermod -aG docker "$USER"
+    info "installed        docker.io + docker-compose-plugin (log out/in for group membership to apply)"
+else
+    info "already present  docker"
+fi
+
+mkdir -p "$TOOLS/ad-exploitation/bloodhound"
+if [[ ! -f "$TOOLS/ad-exploitation/bloodhound/docker-compose.yml" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/SpecterOps/BloodHound/main/examples/docker-compose/docker-compose.yml" \
+        -o "$TOOLS/ad-exploitation/bloodhound/docker-compose.yml" \
+        && info "downloaded       BloodHound CE docker-compose.yml" \
+        || { info "UNAVAILABLE      BloodHound docker-compose.yml"; missing+=("bloodhound-docker-compose"); }
+else
+    info "already present  BloodHound CE docker-compose.yml"
+fi
+info "BloodHound CE: cd $TOOLS/ad-exploitation/bloodhound && docker compose pull && docker compose up -d"
+info "Login at http://localhost:8080/ui/login as admin -- password is printed once, run: docker compose logs bloodhound | grep -i password"
+
 for script in GetNPUsers.py GetUserSPNs.py secretsdump.py psexec.py wmiexec.py; do
     real="$(command -v "$script" 2>/dev/null || true)"
     [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/$script"
@@ -210,6 +232,12 @@ if ! command -v certipy >/dev/null; then
         || { info "UNAVAILABLE      certipy-ad"; missing+=("certipy-ad"); }
 else
     info "already present  certipy"
+fi
+
+CERTIPY_BIN="$(command -v certipy 2>/dev/null || true)"
+if [[ -n "$CERTIPY_BIN" ]]; then
+    ln -sf "$CERTIPY_BIN" "$TOOLS/ad-exploitation/certipy"
+    info "linked           certipy -> $TOOLS/ad-exploitation/certipy"
 fi
 
 # -- shells-payloads (webshells from apt, plink official) --
