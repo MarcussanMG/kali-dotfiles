@@ -190,6 +190,13 @@ if [[ -d /usr/share/sharphound ]]; then
     info "linked           SharpHound.exe + .ps1 from apt package sharphound"
 fi
 
+if [[ -f /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 ]]; then
+    ln -sf /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 "$TOOLS/ad-exploitation/PowerView.ps1"
+    info "linked           PowerView.ps1 from apt package powersploit"
+else
+    info "UNAVAILABLE      powersploit not installed -- PowerView.ps1 skipped"
+fi
+
 for script in GetNPUsers.py GetUserSPNs.py secretsdump.py psexec.py wmiexec.py; do
     real="$(command -v "$script" 2>/dev/null || true)"
     [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/$script"
