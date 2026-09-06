@@ -229,7 +229,7 @@ export LESS="-R"
 
 # batcat follows the terminal palette instead of shipping its own.
 export BAT_THEME="ansi"
-export BAT_STYLE="numbers,changes"
+export BAT_STYLE="header,numbers,grid"
 
 # ═══════════════════════════════════════════════════════════════════════
 #  Plugins
