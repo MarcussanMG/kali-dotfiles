@@ -26,6 +26,7 @@ cd ~/.dotfiles && ./install.sh
 ```
 
 `install.sh` is idempotent — symlinks everything, backs up real files it would overwrite, applies the wallpaper, pre-renders the lock screen, installs the Firefox extension policy, and reloads any running tmux server.
+
 ---
 
 Aliases:
