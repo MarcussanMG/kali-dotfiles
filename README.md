@@ -26,6 +26,50 @@ cd ~/.dotfiles && ./install.sh
 ```
 
 `install.sh` is idempotent — symlinks everything, backs up real files it would overwrite, applies the wallpaper, pre-renders the lock screen, installs the Firefox extension policy, and reloads any running tmux server.
+---
+
+Aliases:
+```bash
+ls        eza --icons --group-directories-first
+ll        eza -lah --icons --git
+la        eza -a --icons
+tree      eza --tree --level=2
+cat       batcat --paging=never
+cls / c   clear
+.. ... .... cd up N levels
+```
+
+Helpers:
+```bash
+tun            # tun0 address
+myip           # every non-loopback address
+ports          # ss -tulpn
+serve          # python3 -m http.server 80
+extractports   # pull open ports from nmap .gnmap/.oG, copy to clipboard
+mkt <name>     # scaffold ~/engagements/<name>/{nmap,web,loot,exploits,notes.md}
+```
+
+Target tracking:
+```bash
+target 10.10.11.42   # set — shows in i3 bar, tmux, prompt, $T
+target                # print current
+```
+
+Live network vars (auto-refresh every 10s, no shell latency):
+```bash
+echo $T   # target's address
+echo $V   # tun0 address, empty if VPN down
+echo $E   # first physical interface address
+```
+
+BloodHound CE (Docker, in `~/tools/ad-exploitation/bloodhound/`):
+```bash
+bloodhound up      # start postgres + neo4j + bloodhound
+bloodhound down    # stop
+bloodhound creds   # print admin password from container logs
+```
+Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forces reset on first login. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
+
 
 ---
 
@@ -172,46 +216,6 @@ Status line: session name · window boxes (bright green = active) · `vpn down`/
 | `Ctrl+U` | Delete to start of line |
 | `Shift+Tab` | Undo last edit |
 
-Aliases:
-```bash
-ls        eza --icons --group-directories-first
-ll        eza -lah --icons --git
-la        eza -a --icons
-tree      eza --tree --level=2
-cat       batcat --paging=never
-cls / c   clear
-.. ... .... cd up N levels
-```
-
-Helpers:
-```bash
-tun            # tun0 address
-myip           # every non-loopback address
-ports          # ss -tulpn
-serve          # python3 -m http.server 80
-extractports   # pull open ports from nmap .gnmap/.oG, copy to clipboard
-mkt <name>     # scaffold ~/engagements/<name>/{nmap,web,loot,exploits,notes.md}
-```
-
-Target tracking:
-```bash
-target 10.10.11.42   # set — shows in i3 bar, tmux, prompt, $T
-target                # print current
-```
-
-Live network vars (auto-refresh every 10s, no shell latency):
-```bash
-echo $V   # tun0 address, empty if VPN down
-echo $E   # first physical interface address
-```
-
-BloodHound CE (Docker, in `~/tools/ad-exploitation/bloodhound/`):
-```bash
-bloodhound up      # start postgres + neo4j + bloodhound
-bloodhound down    # stop
-bloodhound creds   # print admin password from container logs
-```
-Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forces reset on first login. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
 
 Reload:
 ```bash
