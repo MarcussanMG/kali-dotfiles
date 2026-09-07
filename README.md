@@ -20,6 +20,17 @@ cd ~/.dotfiles
 
 Log out, select the **i3** session, log back in.
 
+
+---
+
+## Burp Suite setup
+
+```bash
+sudo apt install -y libnss3-tools   # needed once, for certutil
+~/.dotfiles/bin/setup-burp.sh
+```
+Starts Burp, waits for `127.0.0.1:8080`, trusts its CA cert in Firefox, copies a FoxyProxy import string to the clipboard (paste into FoxyProxy → Options → Import Proxy List).
+
 ---
 
 Aliases:
@@ -227,17 +238,6 @@ cp /path/to/image.jpg ~/.dotfiles/wallpapers/nightgrid.png   # must be .png — 
 feh --bg-fill ~/.dotfiles/wallpapers/nightgrid.png
 rm -f ~/.cache/i3lock/blurred.png
 ```
-
----
-
-## Burp Suite setup
-
-```bash
-sudo apt install -y libnss3-tools   # needed once, for certutil
-~/.dotfiles/bin/setup-burp.sh
-```
-Starts Burp, waits for `127.0.0.1:8080`, trusts its CA cert in Firefox, copies a FoxyProxy import string to the clipboard (paste into FoxyProxy → Options → Import Proxy List).
-
 ---
 
 ## picom: `xrender`, not `glx`
