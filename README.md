@@ -20,7 +20,8 @@ cd ~/.dotfiles
 
 Log out, select the **i3** session, log back in.
 
-https://github.com/MarcussanMG/kali-dotfiles/blob/b89781c8300c107c8b5bed5dc778c3f02f0c9eb7/i3_config.png
+![image alt](https://github.com/MarcussanMG/kali-dotfiles/blob/b89781c8300c107c8b5bed5dc778c3f02f0c9eb7/i3_config.png)
+
 ---
 
 ## Burp Suite setup
