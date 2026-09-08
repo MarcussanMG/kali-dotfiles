@@ -6,11 +6,15 @@
 
 `i3` · `kitty` · `tmux` · `rofi` · `zsh` — themed with **nightgrid**
 
+
+
+![image alt](https://github.com/MarcussanMG/kali-dotfiles/blob/badd163e834babed9d1daad50f72a50a56fc5092/presentation.gif)
+
 </div>
 
 ---
 
-## Install
+# Install
 
 ```bash
 git clone https://github.com/MarcussanMG/kali-oscp-dotfiles.git ~/.dotfiles
