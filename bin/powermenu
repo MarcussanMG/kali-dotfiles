@@ -4,7 +4,7 @@ set -uo pipefail
 
 theme="$HOME/.config/rofi/powermenu.rasi"
 
-chosen=$(printf '\n\n󰗽\n' \
+chosen=$(printf '%s\n' '󰐥' '󰜉' '󰍃' '󰌾' \
     | rofi -dmenu -i -theme "$theme" -p "" -no-custom -format i)
 
 case "$chosen" in
