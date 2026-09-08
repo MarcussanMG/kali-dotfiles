@@ -53,12 +53,13 @@ ports          # ss -tulpn
 serve          # python3 -m http.server 80
 extractports   # pull open ports from nmap .gnmap/.oG, copy to clipboard
 mkt <name>     # scaffold ~/engagements/<name>/{nmap,web,loot,exploits,notes.md}
+notes          # Pulls clean notes from github and opens cherrytree
 ```
 
 Target tracking:
 ```bash
 target 10.10.11.42   # set — shows in i3 bar, tmux, prompt, $T
-target                # print current
+target               # print current
 ```
 
 Live network vars (auto-refresh every 10s, no shell latency):
