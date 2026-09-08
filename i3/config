@@ -37,6 +37,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.local/bin/lockscreen
 exec --no-startup-id nm-applet
 exec_always --no-startup-id feh --bg-fill ~/.dotfiles/wallpapers/nightgrid.png
 exec_always --no-startup-id ~/.local/bin/start-picom
+exec --no-startup-id ~/.local/bin/sync-notes.sh
 
 # ───────────────────────────────────────────────────────────────────────
 #  Audio keys
