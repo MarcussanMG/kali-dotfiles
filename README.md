@@ -59,7 +59,7 @@ ports          # ss -tulpn
 serve          # python3 -m http.server 80
 extractports   # pull open ports from nmap .gnmap/.oG, copy to clipboard
 mkt <name>     # scaffold ~/engagements/<name>/{nmap,web,loot,exploits,notes.md}
-notes          # Pulls clean notes from github and opens cherrytree
+notes          # opens cherrytree (notes are wiped on reboot)
 ```
 
 Target tracking:
@@ -85,10 +85,10 @@ Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forc
 
 Pentesting notes (CherryTree, synced from [CherryTreePentestingNotes](https://github.com/MarcussanMG/CherryTreePentestingNotes)):
 ```bash
-notes   # resets to origin/main and opens the .ctb in CherryTree
+notes   # resets to origin/main on restart and command  opens the .ctb in CherryTree 
 ```
 Anything edited inside CherryTree is disposable — every `notes` call hard-resets the
-local clone to whatever is on GitHub before opening. Maintain the actual notes from
+local clone to whatever is on GitHub when OS restart. Maintain the actual notes from
 wherever you edit that repo, not from inside Kali.
 
 
