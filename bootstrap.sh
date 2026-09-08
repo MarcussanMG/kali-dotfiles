@@ -15,7 +15,7 @@ info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 [[ $EUID -eq 0 ]] && { echo "Run as your normal user, not root." >&2; exit 1; }
 
 PACKAGES=(
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells
+    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree
     rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells
     # ── Window manager and desktop ──
     i3 i3lock i3blocks suckless-tools dex
@@ -552,6 +552,56 @@ fi
 
 info "dnscat2 has no official Windows .exe -- the client side is dnscat2.ps1, PowerShell-only. Not linked."
 info "BloodHound UI is now Docker/web-based (Community Edition). Run: sudo apt install bloodhound && sudo bloodhound-setup"
+
+
+step "Syncing pentesting notes (CherryTree)"
+NOTES_DIR="$HOME/.notes-repo"
+NOTES_REPO="https://github.com/MarcussanMG/CherryTreePentestingNotes.git"
+if [[ -d "$NOTES_DIR/.git" ]]; then
+    (
+        cd "$NOTES_DIR" || exit 1
+        git fetch origin >/dev/null 2>&1
+        BRANCH="$(git remote show origin 2>/dev/null | sed -n '/HEAD branch/s/.*: //p')"
+        git reset --hard "origin/${BRANCH:-main}" >/dev/null 2>&1
+        git clean -fd >/dev/null 2>&1
+    )
+    info "already present  CherryTreePentestingNotes (synced to origin)"
+else
+    if git clone --quiet "$NOTES_REPO" "$NOTES_DIR" >/dev/null 2>&1; then
+        info "cloned           CherryTreePentestingNotes"
+    else
+        info "UNAVAILABLE      CherryTreePentestingNotes (clone failed -- private repo?)"
+        missing+=("CherryTreePentestingNotes")
+    fi
+fi
+
+
+step "Installing Postman"
+if [[ -x /usr/local/bin/postman ]]; then
+    info "already present  postman"
+else
+    TMPTAR="$(mktemp --suffix=.tar.gz)"
+    if curl -fsSL "https://dl.pstmn.io/download/latest/linux_64" -o "$TMPTAR"; then
+        sudo rm -rf /opt/Postman
+        sudo tar -xzf "$TMPTAR" -C /opt
+        rm -f "$TMPTAR"
+        sudo ln -sf /opt/Postman/Postman /usr/local/bin/postman
+        sudo tee /usr/share/applications/postman.desktop > /dev/null << 'DESKTOP'
+[Desktop Entry]
+Name=Postman
+Exec=/opt/Postman/Postman
+Icon=/opt/Postman/app/resources/app/assets/icon.png
+Terminal=false
+Type=Application
+Categories=Development;
+DESKTOP
+        info "installed        postman"
+    else
+        info "UNAVAILABLE      postman (download failed)"
+        missing+=("postman")
+        rm -f "$TMPTAR"
+    fi
+fi
 
 "$DOTFILES/install.sh"
 

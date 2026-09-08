@@ -34,7 +34,7 @@ Starts Burp, waits for `127.0.0.1:8080`, trusts its CA cert in Firefox, copies a
 
 ---
 
-Aliases:
+### Aliases
 ```bash
 ls        eza --icons --group-directories-first
 ll        eza -lah --icons --git
@@ -75,6 +75,14 @@ bloodhound down    # stop
 bloodhound creds   # print admin password from container logs
 ```
 Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forces reset on first login. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
+
+Pentesting notes (CherryTree, synced from [CherryTreePentestingNotes](https://github.com/MarcussanMG/CherryTreePentestingNotes)):
+```bash
+notes   # resets to origin/main and opens the .ctb in CherryTree
+```
+Anything edited inside CherryTree is disposable — every `notes` call hard-resets the
+local clone to whatever is on GitHub before opening. Maintain the actual notes from
+wherever you edit that repo, not from inside Kali.
 
 
 ---
