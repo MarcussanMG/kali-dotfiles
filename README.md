@@ -25,10 +25,8 @@ cd ~/.dotfiles
 Log out, select the **i3** session, log back in.
 
 <p align="center">
-  <img src="[path/to/image.png](https://github.com/MarcussanMG/kali-dotfiles/blob/b89781c8300c107c8b5bed5dc778c3f02f0c9eb7/i3_config.png)" alt="Select the i3 session" width="350">
+  <img src="i3_config.png" alt="Select the i3 session" width="350">
 </p>
-
-![image alt](https://github.com/MarcussanMG/kali-dotfiles/blob/b89781c8300c107c8b5bed5dc778c3f02f0c9eb7/i3_config.png)
 
 ---
 
