@@ -1,6 +1,6 @@
 <div align="center">
 
-# Kali OSCP Workstation
+# Kali Workstation
 
 **A minimal, fast, and reproducible Kali Linux environment for PEN-200 and the OSCP exam.**
 
