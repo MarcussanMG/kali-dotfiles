@@ -148,7 +148,7 @@ Notes:
 
 # Keyboard shortcuts
 
-## i3 — `Super` (Mod) key
+## i3 — `Super` (Mod) key = Windows key
 
 | Shortcut | Action |
 | --- | --- |
