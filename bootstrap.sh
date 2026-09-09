@@ -332,6 +332,21 @@ else
     missing+=("ligolo-agent")
 fi
 
+# -- exploits (web / windows / linux) --
+mkdir -p "$TOOLS"/exploits/{web,windows,linux}
+
+if [[ ! -d "$TOOLS/exploits/windows/AutoBlue-MS17-010" ]]; then
+    if git clone --quiet "https://github.com/3ndG4me/AutoBlue-MS17-010.git" \
+        "$TOOLS/exploits/windows/AutoBlue-MS17-010" 2>/dev/null; then
+        info "cloned           AutoBlue-MS17-010 into exploits/windows/"
+    else
+        info "UNAVAILABLE      AutoBlue-MS17-010 (clone failed)"
+        missing+=("AutoBlue-MS17-010")
+    fi
+else
+    info "already present  AutoBlue-MS17-010"
+fi
+
 info "dnscat2 has no official Windows .exe -- the client side is dnscat2.ps1, PowerShell-only. Not linked."
 info "BloodHound UI is now Docker/web-based (Community Edition). Run: sudo apt install bloodhound && sudo bloodhound-setup"
 
