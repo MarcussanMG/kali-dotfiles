@@ -339,6 +339,13 @@ if [[ ! -d "$TOOLS/exploits/windows/AutoBlue-MS17-010" ]]; then
     if git clone --quiet "https://github.com/3ndG4me/AutoBlue-MS17-010.git" \
         "$TOOLS/exploits/windows/AutoBlue-MS17-010" 2>/dev/null; then
         info "cloned           AutoBlue-MS17-010 into exploits/windows/"
+        if pip install -q -r "$TOOLS/exploits/windows/AutoBlue-MS17-010/requirements.txt" \
+            --break-system-packages 2>/dev/null; then
+            info "installed        AutoBlue-MS17-010 python deps"
+        else
+            info "UNAVAILABLE      AutoBlue-MS17-010 deps (pip install failed)"
+            missing+=("AutoBlue-MS17-010 deps")
+        fi
     else
         info "UNAVAILABLE      AutoBlue-MS17-010 (clone failed)"
         missing+=("AutoBlue-MS17-010")
