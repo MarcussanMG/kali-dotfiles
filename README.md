@@ -17,7 +17,7 @@
 # Install
 
 ```bash
-git clone https://github.com/MarcussanMG/kali-oscp-dotfiles.git ~/.dotfiles
+git clone https://github.com/MarcussanMG/kali-dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ./bootstrap.sh
 ```

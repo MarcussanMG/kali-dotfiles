@@ -168,17 +168,9 @@ configure_prompt() {
 notes() {
     local NOTES_DIR="$HOME/.notes-repo"
     if [[ ! -d "$NOTES_DIR/.git" ]]; then
-        print -P "%F{#f87171}%f notes repo not found -- run bootstrap.sh first"
+        print -P "%F{#f87171}%f notes repo not found -- sync-notes.sh runs on i3 start, or run it manually"
         return 1
     fi
-    (
-        cd "$NOTES_DIR" || return 1
-        git fetch origin >/dev/null 2>&1
-        local BRANCH
-        BRANCH="$(git remote show origin 2>/dev/null | sed -n '/HEAD branch/s/.*: //p')"
-        git reset --hard "origin/${BRANCH:-main}" >/dev/null 2>&1
-        git clean -fd >/dev/null 2>&1
-    )
     local CT_FILE
     CT_FILE="$(find "$NOTES_DIR" -maxdepth 1 \( -name '*.ctb' -o -name '*.ctd' \) | head -1)"
     if [[ -z "$CT_FILE" ]]; then
