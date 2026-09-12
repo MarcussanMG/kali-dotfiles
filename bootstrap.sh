@@ -278,6 +278,18 @@ command -v chisel >/dev/null && \
     ln -sf "$(command -v chisel)" "$TOOLS/tunneling-pivoting/chisel" && \
     info "linked           chisel (Linux, from apt)"
 
+# Only x86_64 is published as a compiled binary in this repo -- the x86
+# (32-bit) build script exists upstream but no prebuilt binary ships with it.
+if [[ ! -f "$TOOLS/tunneling-pivoting/socat-x86_64" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/andrew-d/static-binaries/master/binaries/linux/x86_64/socat" \
+        -o "$TOOLS/tunneling-pivoting/socat-x86_64" \
+        && chmod +x "$TOOLS/tunneling-pivoting/socat-x86_64" \
+        && info "downloaded       socat-x86_64 (static, for targets without socat)" \
+        || { info "UNAVAILABLE      socat-x86_64"; missing+=("socat-x86_64"); }
+else
+    info "already present  socat-x86_64"
+fi
+
 [[ -f /etc/proxychains4.conf ]] && \
     ln -sf /etc/proxychains4.conf "$TOOLS/tunneling-pivoting/proxychains4.conf" && \
     info "linked           proxychains4.conf (edit the real /etc/proxychains4.conf -- this is a shortcut, not a copy)"
