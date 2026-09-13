@@ -227,6 +227,20 @@ else
     info "UNAVAILABLE      powersploit not installed -- PowerView.ps1 skipped"
 fi
 
+if ! command -v netexec >/dev/null && ! command -v nxc >/dev/null; then
+    sudo apt-get install -y netexec >/dev/null 2>&1
+fi
+
+if [[ ! -f "$TOOLS/ad-exploitation/nxcspray" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/NTHSec/nxcspray/main/nxcspray" \
+        -o "$TOOLS/ad-exploitation/nxcspray" \
+        && chmod +x "$TOOLS/ad-exploitation/nxcspray" \
+        && info "downloaded       nxcspray (needs netexec on PATH)" \
+        || { info "UNAVAILABLE      nxcspray"; missing+=("nxcspray"); }
+else
+    info "already present  nxcspray"
+fi
+
 # -- BloodHound CE (Docker Compose) --
 if ! command -v docker >/dev/null; then
     sudo apt-get install -y docker.io docker-compose-plugin >/dev/null 2>&1
