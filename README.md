@@ -195,6 +195,9 @@ Exam mode is sticky across reboots until toggled off again.
 | `Ctrl+A -` | Split top/bottom |
 | `Ctrl+A` arrows | Focus pane |
 | `Ctrl+A T` | Rename pane |
+| `Ctrl+A q` | Show pane numbers on screen (3s) |
+| `Ctrl+A m` | Swap current pane with a specific pane number |
+| `Ctrl+A {` / `}` | Swap current pane with the previous/next one |
 | `Ctrl+A C` | New window |
 | `Ctrl+A ,` | Rename window |
 | `Ctrl+A N` / `P` | Next / previous window |
