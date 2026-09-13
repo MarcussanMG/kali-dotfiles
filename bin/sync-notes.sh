@@ -5,7 +5,7 @@
 set -uo pipefail
 
 NOTES_DIR="$HOME/.notes-repo"
-NOTES_REPO="https://github.com/MarcussanMG/CherryTreePentestingNotes.git"
+NOTES_REPO="https://github.com/MarcussanMG/PentestingNotes.git"
 
 if [[ ! -d "$NOTES_DIR/.git" ]]; then
     git clone --quiet "$NOTES_REPO" "$NOTES_DIR" 2>/dev/null || exit 0

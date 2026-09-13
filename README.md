@@ -83,7 +83,7 @@ bloodhound creds   # print admin password from container logs
 ```
 Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forces reset on first login. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
 
-Pentesting notes (CherryTree, synced from [CherryTreePentestingNotes](https://github.com/MarcussanMG/CherryTreePentestingNotes)):
+Pentesting notes (CherryTree, synced from [PentestingNotes](https://github.com/MarcussanMG/PentestingNotes)):
 ```bash
 notes   # resets to origin/main on restart and command  opens the .ctb in CherryTree 
 ```

@@ -184,10 +184,40 @@ fi
     ln -sf /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/mimikatz" && \
     info "linked           mimikatz/ from apt package mimikatz"
 
+mkdir -p "$TOOLS/ad-exploitation/ingestors"
+
 if [[ -d /usr/share/sharphound ]]; then
-    ln -sf /usr/share/sharphound/SharpHound.exe "$TOOLS/ad-exploitation/SharpHound.exe"
-    ln -sf /usr/share/sharphound/SharpHound.ps1 "$TOOLS/ad-exploitation/SharpHound.ps1"
+    ln -sf /usr/share/sharphound/SharpHound.exe "$TOOLS/ad-exploitation/ingestors/SharpHound.exe"
+    ln -sf /usr/share/sharphound/SharpHound.ps1 "$TOOLS/ad-exploitation/ingestors/SharpHound.ps1"
     info "linked           SharpHound.exe + .ps1 from apt package sharphound"
+fi
+
+if ! command -v bloodhound-python >/dev/null; then
+    sudo apt-get install -y bloodhound.py >/dev/null 2>&1
+fi
+if command -v bloodhound-python >/dev/null; then
+    ln -sf "$(command -v bloodhound-python)" "$TOOLS/ad-exploitation/ingestors/bloodhound-python"
+    info "linked           bloodhound-python from apt package bloodhound.py"
+else
+    info "UNAVAILABLE      bloodhound.py"
+    missing+=("bloodhound.py")
+fi
+
+if [[ ! -f "$TOOLS/ad-exploitation/ingestors/rusthound-ce" ]]; then
+    TMPTGZ="$(mktemp --suffix=.tar.gz)"
+    if curl -fsSL "https://github.com/g0h4n/RustHound-CE/releases/latest/download/rusthound-ce-Linux-gnu-x86_64.tar.gz" \
+        -o "$TMPTGZ"; then
+        tar -xzf "$TMPTGZ" -C "$TOOLS/ad-exploitation/ingestors" rusthound-ce 2>/dev/null
+        chmod +x "$TOOLS/ad-exploitation/ingestors/rusthound-ce" 2>/dev/null
+        rm -f "$TMPTGZ"
+        info "downloaded       rusthound-ce (BloodHound CE collector, Rust)"
+    else
+        info "UNAVAILABLE      rusthound-ce"
+        missing+=("rusthound-ce")
+        rm -f "$TMPTGZ"
+    fi
+else
+    info "already present  rusthound-ce"
 fi
 
 if [[ -f /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 ]]; then
@@ -373,7 +403,7 @@ info "BloodHound UI is now Docker/web-based (Community Edition). Run: sudo apt i
 
 step "Syncing pentesting notes (CherryTree)"
 NOTES_DIR="$HOME/.notes-repo"
-NOTES_REPO="https://github.com/MarcussanMG/CherryTreePentestingNotes.git"
+NOTES_REPO="https://github.com/MarcussanMG/PentestingNotes.git"
 if [[ -d "$NOTES_DIR/.git" ]]; then
     (
         cd "$NOTES_DIR" || exit 1
