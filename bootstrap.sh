@@ -16,7 +16,7 @@ info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 
 PACKAGES=(
     rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells
+    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer
     # ── Window manager and desktop ──
     i3 i3lock i3blocks suckless-tools dex
     picom feh rofi lxappearance
@@ -310,6 +310,18 @@ else
 fi
 GIT_DUMPER_BIN="$(command -v git-dumper 2>/dev/null || true)"
 [[ -n "$GIT_DUMPER_BIN" ]] && ln -sf "$GIT_DUMPER_BIN" "$TOOLS/exploits/web/git-dumper"
+
+if ! command -v autorecon >/dev/null; then
+    command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
+    pipx install autorecon >/dev/null 2>&1 \
+        && info "installed        autorecon (via pipx)" \
+        || { info "UNAVAILABLE      autorecon"; missing+=("autorecon"); }
+else
+    info "already present  autorecon"
+fi
+AUTORECON_BIN="$(command -v autorecon 2>/dev/null || true)"
+mkdir -p "$TOOLS/recon"
+[[ -n "$AUTORECON_BIN" ]] && ln -sf "$AUTORECON_BIN" "$TOOLS/recon/autorecon"
 
 CERTIPY_BIN="$(command -v certipy 2>/dev/null || true)"
 if [[ -n "$CERTIPY_BIN" ]]; then
