@@ -95,10 +95,11 @@ else
 fi
 
 # -- windows-privesc (winpeas/powerup/privesccheck from apt where possible) --
+mkdir -p "$TOOLS/windows-privesc/winpeas"
 if [[ -d /usr/share/peass/winpeas ]]; then
-    ln -sf /usr/share/peass/winpeas/winPEAS.bat     "$TOOLS/windows-privesc/WinPEAS.bat"
-    ln -sf /usr/share/peass/winpeas/winPEASx64.exe  "$TOOLS/windows-privesc/WinPEASx64.exe"
-    ln -sf /usr/share/peass/winpeas/winPEASx86.exe  "$TOOLS/windows-privesc/WinPEASx86.exe"
+    ln -sf /usr/share/peass/winpeas/winPEAS.bat     "$TOOLS/windows-privesc/winpeas/WinPEAS.bat"
+    ln -sf /usr/share/peass/winpeas/winPEASx64.exe  "$TOOLS/windows-privesc/winpeas/WinPEASx64.exe"
+    ln -sf /usr/share/peass/winpeas/winPEASx86.exe  "$TOOLS/windows-privesc/winpeas/WinPEASx86.exe"
     info "linked           WinPEAS (bat, x64, x86) from apt package peass"
 else
     info "UNAVAILABLE      peass not installed -- winpeas skipped"
@@ -127,11 +128,12 @@ else
     info "UNAVAILABLE      ncat-w32 not installed"
 fi
 
-if [[ ! -f "$TOOLS/windows-privesc/accesschk64.exe" ]]; then
+mkdir -p "$TOOLS/windows-privesc/accesschk"
+if [[ ! -f "$TOOLS/windows-privesc/accesschk/accesschk64.exe" ]]; then
     TMPZIP="$(mktemp --suffix=.zip)"
     if curl -fsSL "https://download.sysinternals.com/files/AccessChk.zip" -o "$TMPZIP"; then
         unzip -oq "$TMPZIP" -d "$TOOLS/windows-privesc/accesschk-tmp"
-        mv "$TOOLS/windows-privesc/accesschk-tmp"/*.exe "$TOOLS/windows-privesc/" 2>/dev/null
+        mv "$TOOLS/windows-privesc/accesschk-tmp"/*.exe "$TOOLS/windows-privesc/accesschk/" 2>/dev/null
         rm -rf "$TOOLS/windows-privesc/accesschk-tmp" "$TMPZIP"
         info "downloaded       accesschk (official Sysinternals)"
     else
@@ -142,14 +144,34 @@ else
     info "already present  accesschk"
 fi
 
+mkdir -p "$TOOLS/windows-privesc/ghostpack"
 for bin in Rubeus.exe SharpUp.exe; do
-    if [[ ! -f "$TOOLS/windows-privesc/$bin" ]]; then
+    if [[ ! -f "$TOOLS/windows-privesc/ghostpack/$bin" ]]; then
         curl -fsSL "https://raw.githubusercontent.com/r3motecontrol/Ghostpack-CompiledBinaries/master/$bin" \
-            -o "$TOOLS/windows-privesc/$bin" \
+            -o "$TOOLS/windows-privesc/ghostpack/$bin" \
             && info "downloaded       $bin (community-compiled -- GhostPack is source-only upstream)" \
             || { info "UNAVAILABLE      $bin"; missing+=("$bin"); }
     else
         info "already present  $bin"
+    fi
+done
+
+# -- potato attacks (SeImpersonatePrivilege -> SYSTEM) --
+mkdir -p "$TOOLS/windows-privesc/potatoes"
+declare -A POTATO_URLS=(
+    ["PrintSpoofer32.exe"]="https://github.com/itm4n/PrintSpoofer/releases/latest/download/PrintSpoofer32.exe"
+    ["PrintSpoofer64.exe"]="https://github.com/itm4n/PrintSpoofer/releases/latest/download/PrintSpoofer64.exe"
+    ["GodPotato-NET2.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET2.exe"
+    ["GodPotato-NET35.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET35.exe"
+    ["GodPotato-NET4.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET4.exe"
+)
+for name in "${!POTATO_URLS[@]}"; do
+    if [[ ! -f "$TOOLS/windows-privesc/potatoes/$name" ]]; then
+        curl -fsSL "${POTATO_URLS[$name]}" -o "$TOOLS/windows-privesc/potatoes/$name" \
+            && info "downloaded       $name" \
+            || { info "UNAVAILABLE      $name"; missing+=("$name"); }
+    else
+        info "already present  $name"
     fi
 done
 
@@ -312,13 +334,14 @@ else
 fi
 
 # -- tunneling-pivoting (chisel from apt for Linux, GitHub for the Windows build) --
-if [[ ! -f "$TOOLS/tunneling-pivoting/chisel.exe" ]]; then
+mkdir -p "$TOOLS/tunneling-pivoting/chisel"
+if [[ ! -f "$TOOLS/tunneling-pivoting/chisel/chisel.exe" ]]; then
     CHISEL_WIN_URL="$(curl -fsSL https://api.github.com/repos/jpillora/chisel/releases/latest \
         | grep browser_download_url | grep -i windows | grep -i amd64 | cut -d '"' -f4)"
     if [[ -n "$CHISEL_WIN_URL" ]]; then
         TMPGZ="$(mktemp --suffix=.gz)"
         curl -fsSL "$CHISEL_WIN_URL" -o "$TMPGZ" \
-            && gunzip -c "$TMPGZ" > "$TOOLS/tunneling-pivoting/chisel.exe" \
+            && gunzip -c "$TMPGZ" > "$TOOLS/tunneling-pivoting/chisel/chisel.exe" \
             && rm -f "$TMPGZ" \
             && info "downloaded       chisel.exe"
     else
@@ -330,7 +353,7 @@ else
 fi
 
 command -v chisel >/dev/null && \
-    ln -sf "$(command -v chisel)" "$TOOLS/tunneling-pivoting/chisel" && \
+    ln -sf "$(command -v chisel)" "$TOOLS/tunneling-pivoting/chisel/chisel" && \
     info "linked           chisel (Linux, from apt)"
 
 # Only x86_64 is published as a compiled binary in this repo -- the x86
@@ -350,18 +373,19 @@ fi
     info "linked           proxychains4.conf (edit the real /etc/proxychains4.conf -- this is a shortcut, not a copy)"
 
 # -- ligolo-ng (proxy for Kali, agents for Windows/Linux targets) --
+mkdir -p "$TOOLS/tunneling-pivoting/ligolo"
 LIGOLO_RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/nicocha30/ligolo-ng/releases/latest)"
 
 LIGOLO_PROXY_URL="$(printf '%s' "$LIGOLO_RELEASE_JSON" | grep browser_download_url | grep -i proxy | grep -i linux | grep -i amd64 | grep -i tar.gz | cut -d '"' -f4)"
-if [[ -n "$LIGOLO_PROXY_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo-proxy" ]]; then
+if [[ -n "$LIGOLO_PROXY_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-proxy" ]]; then
     TMPTGZ="$(mktemp --suffix=.tar.gz)"
     curl -fsSL "$LIGOLO_PROXY_URL" -o "$TMPTGZ" \
-        && tar -xzf "$TMPTGZ" -C "$TOOLS/tunneling-pivoting" proxy \
-        && mv "$TOOLS/tunneling-pivoting/proxy" "$TOOLS/tunneling-pivoting/ligolo-proxy" \
-        && chmod +x "$TOOLS/tunneling-pivoting/ligolo-proxy" \
+        && tar -xzf "$TMPTGZ" -C "$TOOLS/tunneling-pivoting/ligolo" proxy \
+        && mv "$TOOLS/tunneling-pivoting/ligolo/proxy" "$TOOLS/tunneling-pivoting/ligolo/ligolo-proxy" \
+        && chmod +x "$TOOLS/tunneling-pivoting/ligolo/ligolo-proxy" \
         && rm -f "$TMPTGZ" \
         && info "downloaded       ligolo-proxy"
-elif [[ -f "$TOOLS/tunneling-pivoting/ligolo-proxy" ]]; then
+elif [[ -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-proxy" ]]; then
     info "already present  ligolo-proxy"
 else
     info "UNAVAILABLE      ligolo-proxy (couldn't resolve latest Linux asset)"
@@ -369,14 +393,14 @@ else
 fi
 
 LIGOLO_AGENT_WIN_URL="$(printf '%s' "$LIGOLO_RELEASE_JSON" | grep browser_download_url | grep -i agent | grep -i windows | grep -i amd64 | grep -i zip | cut -d '"' -f4)"
-if [[ -n "$LIGOLO_AGENT_WIN_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo-agent.exe" ]]; then
+if [[ -n "$LIGOLO_AGENT_WIN_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent.exe" ]]; then
     TMPZIP="$(mktemp --suffix=.zip)"
     curl -fsSL "$LIGOLO_AGENT_WIN_URL" -o "$TMPZIP" \
-        && unzip -oq "$TMPZIP" agent.exe -d "$TOOLS/tunneling-pivoting" \
-        && mv "$TOOLS/tunneling-pivoting/agent.exe" "$TOOLS/tunneling-pivoting/ligolo-agent.exe" \
+        && unzip -oq "$TMPZIP" agent.exe -d "$TOOLS/tunneling-pivoting/ligolo" \
+        && mv "$TOOLS/tunneling-pivoting/ligolo/agent.exe" "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent.exe" \
         && rm -f "$TMPZIP" \
         && info "downloaded       ligolo-agent.exe"
-elif [[ -f "$TOOLS/tunneling-pivoting/ligolo-agent.exe" ]]; then
+elif [[ -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent.exe" ]]; then
     info "already present  ligolo-agent.exe"
 else
     info "UNAVAILABLE      ligolo-agent.exe (couldn't resolve latest Windows asset)"
@@ -384,15 +408,15 @@ else
 fi
 
 LIGOLO_AGENT_LINUX_URL="$(printf '%s' "$LIGOLO_RELEASE_JSON" | grep browser_download_url | grep -i agent | grep -i linux | grep -i amd64 | grep -i tar.gz | cut -d '"' -f4)"
-if [[ -n "$LIGOLO_AGENT_LINUX_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo-agent" ]]; then
+if [[ -n "$LIGOLO_AGENT_LINUX_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent" ]]; then
     TMPTGZ2="$(mktemp --suffix=.tar.gz)"
     curl -fsSL "$LIGOLO_AGENT_LINUX_URL" -o "$TMPTGZ2" \
-        && tar -xzf "$TMPTGZ2" -C "$TOOLS/tunneling-pivoting" agent \
-        && mv "$TOOLS/tunneling-pivoting/agent" "$TOOLS/tunneling-pivoting/ligolo-agent" \
-        && chmod +x "$TOOLS/tunneling-pivoting/ligolo-agent" \
+        && tar -xzf "$TMPTGZ2" -C "$TOOLS/tunneling-pivoting/ligolo" agent \
+        && mv "$TOOLS/tunneling-pivoting/ligolo/agent" "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent" \
+        && chmod +x "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent" \
         && rm -f "$TMPTGZ2" \
         && info "downloaded       ligolo-agent (Linux target build)"
-elif [[ -f "$TOOLS/tunneling-pivoting/ligolo-agent" ]]; then
+elif [[ -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-agent" ]]; then
     info "already present  ligolo-agent"
 else
     info "UNAVAILABLE      ligolo-agent (couldn't resolve latest Linux asset)"

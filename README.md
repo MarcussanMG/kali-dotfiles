@@ -139,17 +139,20 @@ Built by `bootstrap.sh` into `~/tools/`:
 | Category | Contents |
 | --- | --- |
 | `recon/` | kerbrute |
-| `windows-privesc/` | WinPEAS (x64, x86, bat), PowerUp.ps1, PrivescCheck.ps1, accesschk, Rubeus.exe, SharpUp.exe |
+| `windows-privesc/` | `winpeas/`, `accesschk/`, `ghostpack/` (Rubeus.exe, SharpUp.exe), `potatoes/` (GodPotato, PrintSpoofer), PowerUp.ps1, PrivescCheck.ps1 |
 | `linux-privesc/` | linpeas.sh, lse.sh, linux-exploit-suggester.sh |
-| `ad-exploitation/` | Mimikatz, SharpHound (.exe + .ps1), PowerView.ps1, GetNPUsers.py, GetUserSPNs.py, secretsdump.py, psexec.py, wmiexec.py, Certipy, BloodHound CE (Docker) |
+| `ad-exploitation/` | `ingestors/` (SharpHound, BloodHound.py, RustHound-CE), `bloodhound/` (BloodHound CE docker-compose.yml), Mimikatz, PowerView.ps1, Certipy, nxcspray, impacket scripts |
 | `shells-payloads/` | ncat.exe, php-reverse-shell.php, cmdasp.asp, plink.exe |
-| `tunneling-pivoting/` | chisel (+ .exe), ligolo-ng (proxy + agents), proxychains4.conf |
+| `tunneling-pivoting/` | `chisel/`, `ligolo/` (proxy + Windows/Linux agents), socat-x86_64, proxychains4.conf |
+| `exploits/` | `web/` (git-dumper), `windows/` (AutoBlue-MS17-010), `linux/` |
 
 Notes:
 - WinPEAS/PowerUp/linpeas come from apt (`peass`, `powersploit`) — auto-updated with `apt upgrade`.
 - Rubeus.exe/SharpUp.exe are community-compiled (GhostPack ships source-only upstream).
 - `ncat.exe` is used instead of unsigned `nc.exe` mirrors — official Nmap project binary via apt (`ncat-w32`).
 - BloodHound CE is Docker-based now, not a standalone `.exe`.
+- GodPotato is the current all-Windows-versions default; PrintSpoofer is the classic fallback (needs the Print Spooler service reachable).
+- `git-dumper` and `nxcspray` install via pipx / apt automatically; `nxcspray` needs `netexec` on PATH.
 
 ---
 
