@@ -1,5 +1,12 @@
 {
   "policies": {
+    "Bookmarks": [
+      {
+        "Title": "HackTools",
+        "URL": "https://hacktools.sh",
+        "Placement": "toolbar"
+      }
+    ],
     "ExtensionSettings": {
       "foxyproxy@eric.h.jung": {
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/foxyproxy-standard/latest.xpi",
@@ -13,6 +20,11 @@
       },
       "addon@darkreader.org": {
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi",
+        "installation_mode": "normal_installed",
+        "default_area": "navbar"
+      },
+      "{f1423c11-a4e2-4709-a0f8-6d6a68c83d08}": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/hacktools/latest.xpi",
         "installation_mode": "normal_installed",
         "default_area": "navbar"
       }
