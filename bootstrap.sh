@@ -278,6 +278,17 @@ else
     info "already present  certipy"
 fi
 
+if ! command -v git-dumper >/dev/null; then
+    command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
+    pipx install git-dumper >/dev/null 2>&1 \
+        && info "installed        git-dumper (via pipx)" \
+        || { info "UNAVAILABLE      git-dumper"; missing+=("git-dumper"); }
+else
+    info "already present  git-dumper"
+fi
+GIT_DUMPER_BIN="$(command -v git-dumper 2>/dev/null || true)"
+[[ -n "$GIT_DUMPER_BIN" ]] && ln -sf "$GIT_DUMPER_BIN" "$TOOLS/exploits/web/git-dumper"
+
 CERTIPY_BIN="$(command -v certipy 2>/dev/null || true)"
 if [[ -n "$CERTIPY_BIN" ]]; then
     ln -sf "$CERTIPY_BIN" "$TOOLS/ad-exploitation/certipy"
