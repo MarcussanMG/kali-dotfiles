@@ -1,12 +1,5 @@
 {
   "policies": {
-    "Bookmarks": [
-      {
-        "Title": "HackTools",
-        "URL": "https://hacktools.sh",
-        "Placement": "toolbar"
-      }
-    ],
     "ExtensionSettings": {
       "foxyproxy@eric.h.jung": {
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/foxyproxy-standard/latest.xpi",
