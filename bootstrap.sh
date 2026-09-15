@@ -454,6 +454,18 @@ fi
 # -- exploits (web / windows / linux) --
 mkdir -p "$TOOLS"/exploits/{web,windows,linux}
 
+if [[ ! -d "$TOOLS/exploits/windows/Evil-Macro" ]]; then
+    if git clone --quiet "https://github.com/rodolfomarianocy/Evil-Macro.git" \
+        "$TOOLS/exploits/windows/Evil-Macro" 2>/dev/null; then
+        info "cloned           Evil-Macro into exploits/windows/"
+    else
+        info "UNAVAILABLE      Evil-Macro (clone failed)"
+        missing+=("Evil-Macro")
+    fi
+else
+    info "already present  Evil-Macro"
+fi
+
 if [[ ! -d "$TOOLS/exploits/windows/AutoBlue-MS17-010" ]]; then
     if git clone --quiet "https://github.com/3ndG4me/AutoBlue-MS17-010.git" \
         "$TOOLS/exploits/windows/AutoBlue-MS17-010" 2>/dev/null; then
