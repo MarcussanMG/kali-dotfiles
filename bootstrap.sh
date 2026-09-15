@@ -95,26 +95,26 @@ else
 fi
 
 # -- windows-privesc (winpeas/powerup/privesccheck from apt where possible) --
-mkdir -p "$TOOLS/windows-privesc/winpeas"
+mkdir -p "$TOOLS/privesc/windows/winpeas"
 if [[ -d /usr/share/peass/winpeas ]]; then
-    ln -sf /usr/share/peass/winpeas/winPEAS.bat     "$TOOLS/windows-privesc/winpeas/WinPEAS.bat"
-    ln -sf /usr/share/peass/winpeas/winPEASx64.exe  "$TOOLS/windows-privesc/winpeas/WinPEASx64.exe"
-    ln -sf /usr/share/peass/winpeas/winPEASx86.exe  "$TOOLS/windows-privesc/winpeas/WinPEASx86.exe"
+    ln -sf /usr/share/peass/winpeas/winPEAS.bat     "$TOOLS/privesc/windows/winpeas/WinPEAS.bat"
+    ln -sf /usr/share/peass/winpeas/winPEASx64.exe  "$TOOLS/privesc/windows/winpeas/WinPEASx64.exe"
+    ln -sf /usr/share/peass/winpeas/winPEASx86.exe  "$TOOLS/privesc/windows/winpeas/WinPEASx86.exe"
     info "linked           WinPEAS (bat, x64, x86) from apt package peass"
 else
     info "UNAVAILABLE      peass not installed -- winpeas skipped"
 fi
 
 if [[ -f /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 ]]; then
-    ln -sf /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 "$TOOLS/windows-privesc/PowerUp.ps1"
+    ln -sf /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 "$TOOLS/privesc/windows/PowerUp.ps1"
     info "linked           PowerUp.ps1 from apt package powersploit"
 else
     info "UNAVAILABLE      powersploit not installed -- PowerUp.ps1 skipped"
 fi
 
-if [[ ! -f "$TOOLS/windows-privesc/PrivescCheck.ps1" ]]; then
+if [[ ! -f "$TOOLS/privesc/windows/PrivescCheck.ps1" ]]; then
     curl -fsSL "https://github.com/itm4n/PrivescCheck/releases/latest/download/PrivescCheck.ps1" \
-        -o "$TOOLS/windows-privesc/PrivescCheck.ps1" \
+        -o "$TOOLS/privesc/windows/PrivescCheck.ps1" \
         && info "downloaded       PrivescCheck.ps1" \
         || { info "UNAVAILABLE      PrivescCheck.ps1"; missing+=("PrivescCheck.ps1"); }
 else
@@ -128,13 +128,13 @@ else
     info "UNAVAILABLE      ncat-w32 not installed"
 fi
 
-mkdir -p "$TOOLS/windows-privesc/accesschk"
-if [[ ! -f "$TOOLS/windows-privesc/accesschk/accesschk64.exe" ]]; then
+mkdir -p "$TOOLS/privesc/windows/accesschk"
+if [[ ! -f "$TOOLS/privesc/windows/accesschk/accesschk64.exe" ]]; then
     TMPZIP="$(mktemp --suffix=.zip)"
     if curl -fsSL "https://download.sysinternals.com/files/AccessChk.zip" -o "$TMPZIP"; then
-        unzip -oq "$TMPZIP" -d "$TOOLS/windows-privesc/accesschk-tmp"
-        mv "$TOOLS/windows-privesc/accesschk-tmp"/*.exe "$TOOLS/windows-privesc/accesschk/" 2>/dev/null
-        rm -rf "$TOOLS/windows-privesc/accesschk-tmp" "$TMPZIP"
+        unzip -oq "$TMPZIP" -d "$TOOLS/privesc/windows/accesschk-tmp"
+        mv "$TOOLS/privesc/windows/accesschk-tmp"/*.exe "$TOOLS/privesc/windows/accesschk/" 2>/dev/null
+        rm -rf "$TOOLS/privesc/windows/accesschk-tmp" "$TMPZIP"
         info "downloaded       accesschk (official Sysinternals)"
     else
         info "UNAVAILABLE      accesschk"
@@ -144,11 +144,11 @@ else
     info "already present  accesschk"
 fi
 
-mkdir -p "$TOOLS/windows-privesc/ghostpack"
+mkdir -p "$TOOLS/privesc/windows/ghostpack"
 for bin in Rubeus.exe SharpUp.exe; do
-    if [[ ! -f "$TOOLS/windows-privesc/ghostpack/$bin" ]]; then
+    if [[ ! -f "$TOOLS/privesc/windows/ghostpack/$bin" ]]; then
         curl -fsSL "https://raw.githubusercontent.com/r3motecontrol/Ghostpack-CompiledBinaries/master/$bin" \
-            -o "$TOOLS/windows-privesc/ghostpack/$bin" \
+            -o "$TOOLS/privesc/windows/ghostpack/$bin" \
             && info "downloaded       $bin (community-compiled -- GhostPack is source-only upstream)" \
             || { info "UNAVAILABLE      $bin"; missing+=("$bin"); }
     else
@@ -157,7 +157,7 @@ for bin in Rubeus.exe SharpUp.exe; do
 done
 
 # -- potato attacks (SeImpersonatePrivilege -> SYSTEM) --
-mkdir -p "$TOOLS/windows-privesc/potatoes"
+mkdir -p "$TOOLS/privesc/windows/potatoes"
 declare -A POTATO_URLS=(
     ["PrintSpoofer32.exe"]="https://github.com/itm4n/PrintSpoofer/releases/latest/download/PrintSpoofer32.exe"
     ["PrintSpoofer64.exe"]="https://github.com/itm4n/PrintSpoofer/releases/latest/download/PrintSpoofer64.exe"
@@ -166,8 +166,8 @@ declare -A POTATO_URLS=(
     ["GodPotato-NET4.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET4.exe"
 )
 for name in "${!POTATO_URLS[@]}"; do
-    if [[ ! -f "$TOOLS/windows-privesc/potatoes/$name" ]]; then
-        curl -fsSL "${POTATO_URLS[$name]}" -o "$TOOLS/windows-privesc/potatoes/$name" \
+    if [[ ! -f "$TOOLS/privesc/windows/potatoes/$name" ]]; then
+        curl -fsSL "${POTATO_URLS[$name]}" -o "$TOOLS/privesc/windows/potatoes/$name" \
             && info "downloaded       $name" \
             || { info "UNAVAILABLE      $name"; missing+=("$name"); }
     else
@@ -177,28 +177,37 @@ done
 
 # -- linux-privesc (linpeas from apt, lse.sh + les.sh from source) --
 if [[ -d /usr/share/peass/linpeas ]]; then
-    ln -sf /usr/share/peass/linpeas/linpeas.sh "$TOOLS/linux-privesc/linpeas.sh"
+    ln -sf /usr/share/peass/linpeas/linpeas.sh "$TOOLS/privesc/linux/linpeas.sh"
     info "linked           linpeas.sh from apt package peass"
 else
     info "UNAVAILABLE      peass not installed -- linpeas skipped"
 fi
 
-if [[ ! -f "$TOOLS/linux-privesc/lse.sh" ]]; then
+if [[ ! -f "$TOOLS/privesc/linux/lse.sh" ]]; then
     curl -fsSL "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" \
-        -o "$TOOLS/linux-privesc/lse.sh" && chmod +x "$TOOLS/linux-privesc/lse.sh" \
+        -o "$TOOLS/privesc/linux/lse.sh" && chmod +x "$TOOLS/privesc/linux/lse.sh" \
         && info "downloaded       lse.sh" \
         || { info "UNAVAILABLE      lse.sh"; missing+=("lse.sh"); }
 else
     info "already present  lse.sh"
 fi
 
-if [[ ! -f "$TOOLS/linux-privesc/linux-exploit-suggester.sh" ]]; then
+if [[ ! -f "$TOOLS/privesc/linux/linux-exploit-suggester.sh" ]]; then
     curl -fsSL "https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh" \
-        -o "$TOOLS/linux-privesc/linux-exploit-suggester.sh" && chmod +x "$TOOLS/linux-privesc/linux-exploit-suggester.sh" \
+        -o "$TOOLS/privesc/linux/linux-exploit-suggester.sh" && chmod +x "$TOOLS/privesc/linux/linux-exploit-suggester.sh" \
         && info "downloaded       linux-exploit-suggester.sh" \
         || { info "UNAVAILABLE      linux-exploit-suggester.sh"; missing+=("linux-exploit-suggester.sh"); }
 else
     info "already present  linux-exploit-suggester.sh"
+fi
+
+if [[ ! -f "$TOOLS/privesc/linux/LinEnum.sh" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh" \
+        -o "$TOOLS/privesc/linux/LinEnum.sh" && chmod +x "$TOOLS/privesc/linux/LinEnum.sh" \
+        && info "downloaded       LinEnum.sh" \
+        || { info "UNAVAILABLE      LinEnum.sh"; missing+=("LinEnum.sh"); }
+else
+    info "already present  LinEnum.sh"
 fi
 
 # -- ad-exploitation (mimikatz/sharphound from apt, impacket already default on Kali) --
