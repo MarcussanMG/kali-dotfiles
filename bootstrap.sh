@@ -210,6 +210,13 @@ else
     info "already present  LinEnum.sh"
 fi
 
+if command -v unix-privesc-check >/dev/null; then
+    ln -sf "$(command -v unix-privesc-check)" "$TOOLS/privesc/linux/unix-privesc-check"
+    info "linked           unix-privesc-check (already installed on Kali)"
+else
+    info "UNAVAILABLE      unix-privesc-check not found on this system"
+fi
+
 # -- ad-exploitation (mimikatz/sharphound from apt, impacket already default on Kali) --
 [[ -d /usr/share/windows-resources/mimikatz ]] && \
     ln -sf /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/mimikatz" && \
