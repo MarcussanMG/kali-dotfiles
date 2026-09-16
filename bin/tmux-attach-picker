@@ -13,16 +13,39 @@ for sock in "$SOCKET_DIR"/kitty-*; do
     label="$(basename "$sock")"
     while IFS= read -r line; do
         entries+=("${label} :: ${line}")
-    done < <(tmux -L "$label" list-sessions -F '#{session_name}  (#{session_windows} windows, created #{session_created_string})' 2>/dev/null)
+    done < <(tmux -L "$label" list-sessions -F '#{session_name}  (#{session_windows} windows, #{t:session_created})' 2>/dev/null)
 done
 
-[[ ${#entries[@]} -gt 0 ]] || { notify-send "tmux" "No hay sesiones antiguas para recuperar" 2>/dev/null; exit 0; }
+[[ ${#entries[@]} -gt 0 ]] || { notify-send "tmux" "No old sessions to restore" 2>/dev/null; exit 0; }
 
-chosen="$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Recuperar sesión:")"
+chosen="$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Restore session" \
+    -mesg "Enter: open   Alt+d: kill session   Alt+shift+d: kill ALL" \
+    -kb-custom-1 "Alt+d" \
+    -kb-custom-2 "Alt+shift+d")"
+rc=$?
 [[ -n "$chosen" ]] || exit 0
 
 sock="${chosen%% :: *}"
 rest="${chosen#* :: }"
 session="${rest%%  *}"
+
+if [[ $rc -eq 11 ]]; then
+    confirm="$(printf 'No\nYes' | rofi -dmenu -i -p "Kill ALL sessions across every window?")"
+    if [[ "$confirm" == "Yes" ]]; then
+        for sock_all in "$SOCKET_DIR"/kitty-*; do
+            [[ -S "$sock_all" ]] || continue
+            tmux -L "$(basename "$sock_all")" kill-server 2>/dev/null
+        done
+        rm -f "$SOCKET_DIR"/kitty-*
+        notify-send "tmux" "All sessions killed" 2>/dev/null
+    fi
+    exit 0
+fi
+
+if [[ $rc -eq 10 ]]; then
+    tmux -L "$sock" kill-session -t "$session" 2>/dev/null
+    notify-send "tmux" "Session ${session} (${sock}) killed" 2>/dev/null
+    exit 0
+fi
 
 kitty zsh -i -c "tmux -L '$sock' attach-session -t '$session'" &

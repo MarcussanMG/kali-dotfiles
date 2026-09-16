@@ -223,7 +223,29 @@ tmux new-session -s recon
 tmux select-pane -T "Nmap"        # pane title
 ```
 
-`main` auto-attaches on first Kitty window; a second window gets its own session if `main` already has a client. Survives closing Kitty, not reboot.
+### Session isolation
+
+Every Kitty window runs its own tmux **server** (`-L kitty-$$`, keyed to that shell's
+PID), not just a differently-named session on a shared server. This means two windows
+can never see each other's sessions in `tmux ls` or `Ctrl+A W` -- closing one window
+doesn't affect another, and nothing carries over between them.
+
+`Super+Enter` always opens a brand-new window with an empty session. To get back a
+session from a window you already closed:
+
+```
+Super+Shift+Enter
+```
+
+This opens `bin/tmux-attach-picker`, which scans every leftover socket in
+`$TMUX_TMPDIR` (or `/tmp/tmux-$UID`) for still-running sessions and lists them in Rofi:
+
+- `Enter` -- reopen the selected session in a new Kitty window
+- `Alt+d` -- kill that session without opening it
+- `Alt+Shift+D` -- kill every leftover session across every window, with a confirmation prompt
+
+Sessions from closed windows stay alive until you either restore or kill them this
+way, or reboot the machine.
 
 Status line: session name · window boxes (bright green = active) · `vpn down`/tun0 IP · target · shortened cwd.
 
