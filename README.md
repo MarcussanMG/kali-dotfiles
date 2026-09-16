@@ -138,13 +138,18 @@ Built by `bootstrap.sh` into `~/tools/`:
 
 | Category | Contents |
 | --- | --- |
-| `recon/` | kerbrute |
-| `windows-privesc/` | `winpeas/`, `accesschk/`, `ghostpack/` (Rubeus.exe, SharpUp.exe), `potatoes/` (GodPotato, PrintSpoofer), PowerUp.ps1, PrivescCheck.ps1 |
-| `linux-privesc/` | linpeas.sh, lse.sh, linux-exploit-suggester.sh |
-| `ad-exploitation/` | `ingestors/` (SharpHound, BloodHound.py, RustHound-CE), `bloodhound/` (BloodHound CE docker-compose.yml), Mimikatz, PowerView.ps1, Certipy, nxcspray, impacket scripts |
-| `shells-payloads/` | ncat.exe, php-reverse-shell.php, cmdasp.asp, plink.exe |
+| `recon/` | kerbrute, autorecon |
+| `privesc/windows/` | `winpeas/`, `accesschk/`, `ghostpack/` (Rubeus.exe, SharpUp.exe), `potatoes/` (GodPotato, PrintSpoofer), PowerUp.ps1, PrivescCheck.ps1 |
+| `privesc/linux/` | linpeas.sh, lse.sh, linux-exploit-suggester.sh, LinEnum.sh, unix-privesc-check |
+| `ad-exploitation/kerberos/` | impacket-GetNPUsers, impacket-GetUserSPNs, impacket-ticketer, impacket-getST/getTGT, impacket-ticketConverter, impacket-goldenPac |
+| `ad-exploitation/lateral-movement/` | impacket-psexec, impacket-wmiexec, impacket-smbexec, impacket-ntlmrelayx |
+| `ad-exploitation/credential-dumping/` | impacket-secretsdump, Mimikatz |
+| `ad-exploitation/enumeration/` | PowerView.ps1, impacket-GetADUsers/GetADComputers/lookupsid/findDelegation, nxcspray |
+| `ad-exploitation/bloodhound/` | BloodHound CE docker-compose.yml, `ingestors/` (SharpHound, BloodHound.py, RustHound-CE) |
+| `ad-exploitation/` (root) | Certipy |
+| `shells-payloads/` | ncat.exe, php-reverse-shell.php, cmdasp.asp, plink.exe, Penelope |
 | `tunneling-pivoting/` | `chisel/`, `ligolo/` (proxy + Windows/Linux agents), socat-x86_64, proxychains4.conf |
-| `exploits/` | `web/` (git-dumper), `windows/` (AutoBlue-MS17-010), `linux/` |
+| `exploits/` | `web/` (git-dumper), `windows/` (AutoBlue-MS17-010, Evil-Macro), `linux/` |
 
 Notes:
 - WinPEAS/PowerUp/linpeas come from apt (`peass`, `powersploit`) — auto-updated with `apt upgrade`.
@@ -152,7 +157,9 @@ Notes:
 - `ncat.exe` is used instead of unsigned `nc.exe` mirrors — official Nmap project binary via apt (`ncat-w32`).
 - BloodHound CE is Docker-based now, not a standalone `.exe`.
 - GodPotato is the current all-Windows-versions default; PrintSpoofer is the classic fallback (needs the Print Spooler service reachable).
-- `git-dumper` and `nxcspray` install via pipx / apt automatically; `nxcspray` needs `netexec` on PATH.
+- `git-dumper`, `autorecon` and `nxcspray` install via pipx / apt automatically; `nxcspray` needs `netexec` on PATH.
+- `ad-exploitation` is organized by attack phase rather than by tool — impacket's scripts land in whichever phase folder matches what they actually do.
+- Penelope: use `-O`/`--oscp-safe` during the exam. Its `meterpreter` and `traitor` modules need extra care — `traitor` performs automatic privilege escalation, which OSCP rules typically disallow.
 
 ---
 

@@ -16,7 +16,7 @@ info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 
 PACKAGES=(
     rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer
+    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope
     # ── Window manager and desktop ──
     i3 i3lock i3blocks suckless-tools dex
     picom feh rofi lxappearance
@@ -217,38 +217,63 @@ else
     info "UNAVAILABLE      unix-privesc-check not found on this system"
 fi
 
-# -- ad-exploitation (mimikatz/sharphound from apt, impacket already default on Kali) --
-[[ -d /usr/share/windows-resources/mimikatz ]] && \
-    ln -sf /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/mimikatz" && \
-    info "linked           mimikatz/ from apt package mimikatz"
+# -- ad-exploitation, organized by attack phase --
+mkdir -p "$TOOLS/ad-exploitation"/{kerberos,lateral-movement,credential-dumping,enumeration,bloodhound/ingestors}
 
-mkdir -p "$TOOLS/ad-exploitation/ingestors"
+for bin in impacket-GetNPUsers impacket-GetUserSPNs impacket-ticketer impacket-getST impacket-getTGT impacket-ticketConverter impacket-goldenPac; do
+    real="$(command -v "$bin" 2>/dev/null || true)"
+    [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/kerberos/$bin"
+done
+info "linked           impacket kerberos scripts"
+
+for bin in impacket-psexec impacket-wmiexec impacket-smbexec impacket-ntlmrelayx; do
+    real="$(command -v "$bin" 2>/dev/null || true)"
+    [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/lateral-movement/$bin"
+done
+info "linked           impacket lateral-movement scripts"
+
+real="$(command -v impacket-secretsdump 2>/dev/null || true)"
+[[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/credential-dumping/impacket-secretsdump"
+[[ -d /usr/share/windows-resources/mimikatz ]] && \
+    ln -sf /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/credential-dumping/mimikatz" && \
+    info "linked           mimikatz/ + impacket-secretsdump into credential-dumping/"
+
+for bin in impacket-GetADUsers impacket-GetADComputers impacket-lookupsid impacket-findDelegation; do
+    real="$(command -v "$bin" 2>/dev/null || true)"
+    [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/enumeration/$bin"
+done
+if [[ -f /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 ]]; then
+    ln -sf /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 "$TOOLS/ad-exploitation/enumeration/PowerView.ps1"
+    info "linked           PowerView.ps1 + impacket enumeration scripts"
+else
+    info "UNAVAILABLE      powersploit not installed -- PowerView.ps1 skipped"
+fi
 
 if [[ -d /usr/share/sharphound ]]; then
-    ln -sf /usr/share/sharphound/SharpHound.exe "$TOOLS/ad-exploitation/ingestors/SharpHound.exe"
-    ln -sf /usr/share/sharphound/SharpHound.ps1 "$TOOLS/ad-exploitation/ingestors/SharpHound.ps1"
-    info "linked           SharpHound.exe + .ps1 from apt package sharphound"
+    ln -sf /usr/share/sharphound/SharpHound.exe "$TOOLS/ad-exploitation/bloodhound/ingestors/SharpHound.exe"
+    ln -sf /usr/share/sharphound/SharpHound.ps1 "$TOOLS/ad-exploitation/bloodhound/ingestors/SharpHound.ps1"
+    info "linked           SharpHound.exe + .ps1 into bloodhound/ingestors/"
 fi
 
 if ! command -v bloodhound-python >/dev/null; then
     sudo apt-get install -y bloodhound.py >/dev/null 2>&1
 fi
 if command -v bloodhound-python >/dev/null; then
-    ln -sf "$(command -v bloodhound-python)" "$TOOLS/ad-exploitation/ingestors/bloodhound-python"
-    info "linked           bloodhound-python from apt package bloodhound.py"
+    ln -sf "$(command -v bloodhound-python)" "$TOOLS/ad-exploitation/bloodhound/ingestors/bloodhound-python"
+    info "linked           bloodhound-python into bloodhound/ingestors/"
 else
     info "UNAVAILABLE      bloodhound.py"
     missing+=("bloodhound.py")
 fi
 
-if [[ ! -f "$TOOLS/ad-exploitation/ingestors/rusthound-ce" ]]; then
+if [[ ! -f "$TOOLS/ad-exploitation/bloodhound/ingestors/rusthound-ce" ]]; then
     TMPTGZ="$(mktemp --suffix=.tar.gz)"
     if curl -fsSL "https://github.com/g0h4n/RustHound-CE/releases/latest/download/rusthound-ce-Linux-gnu-x86_64.tar.gz" \
         -o "$TMPTGZ"; then
-        tar -xzf "$TMPTGZ" -C "$TOOLS/ad-exploitation/ingestors" rusthound-ce 2>/dev/null
-        chmod +x "$TOOLS/ad-exploitation/ingestors/rusthound-ce" 2>/dev/null
+        tar -xzf "$TMPTGZ" -C "$TOOLS/ad-exploitation/bloodhound/ingestors" rusthound-ce 2>/dev/null
+        chmod +x "$TOOLS/ad-exploitation/bloodhound/ingestors/rusthound-ce" 2>/dev/null
         rm -f "$TMPTGZ"
-        info "downloaded       rusthound-ce (BloodHound CE collector, Rust)"
+        info "downloaded       rusthound-ce into bloodhound/ingestors/"
     else
         info "UNAVAILABLE      rusthound-ce"
         missing+=("rusthound-ce")
@@ -258,21 +283,14 @@ else
     info "already present  rusthound-ce"
 fi
 
-if [[ -f /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 ]]; then
-    ln -sf /usr/share/windows-resources/powersploit/Recon/PowerView.ps1 "$TOOLS/ad-exploitation/PowerView.ps1"
-    info "linked           PowerView.ps1 from apt package powersploit"
-else
-    info "UNAVAILABLE      powersploit not installed -- PowerView.ps1 skipped"
-fi
-
 if ! command -v netexec >/dev/null && ! command -v nxc >/dev/null; then
     sudo apt-get install -y netexec >/dev/null 2>&1
 fi
 
-if [[ ! -f "$TOOLS/ad-exploitation/nxcspray" ]]; then
+if [[ ! -f "$TOOLS/ad-exploitation/enumeration/nxcspray" ]]; then
     curl -fsSL "https://raw.githubusercontent.com/NTHSec/nxcspray/main/nxcspray" \
-        -o "$TOOLS/ad-exploitation/nxcspray" \
-        && chmod +x "$TOOLS/ad-exploitation/nxcspray" \
+        -o "$TOOLS/ad-exploitation/enumeration/nxcspray" \
+        && chmod +x "$TOOLS/ad-exploitation/enumeration/nxcspray" \
         && info "downloaded       nxcspray (needs netexec on PATH)" \
         || { info "UNAVAILABLE      nxcspray"; missing+=("nxcspray"); }
 else
@@ -300,12 +318,6 @@ else
 fi
 info "BloodHound CE: cd $TOOLS/ad-exploitation/bloodhound && docker compose pull && docker compose up -d"
 info "Login at http://localhost:8080/ui/login as admin -- password is printed once, run: docker compose logs bloodhound | grep -i password"
-
-for script in GetNPUsers.py GetUserSPNs.py secretsdump.py psexec.py wmiexec.py; do
-    real="$(command -v "$script" 2>/dev/null || true)"
-    [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/$script"
-done
-info "linked           impacket scripts (already installed by default on Kali)"
 
 if ! command -v certipy >/dev/null; then
     command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
@@ -351,6 +363,10 @@ if [[ -d /usr/share/webshells ]]; then
     ln -sf /usr/share/webshells/asp/cmdasp.asp            "$TOOLS/shells-payloads/asp-shell.asp"
     info "linked           php-shell.php + asp-shell.asp from apt package webshells"
 fi
+
+command -v penelope >/dev/null && \
+    ln -sf "$(command -v penelope)" "$TOOLS/shells-payloads/penelope" && \
+    info "linked           penelope (shell handler, from apt)"
 
 if [[ ! -f "$TOOLS/shells-payloads/plink.exe" ]]; then
     curl -fsSL "https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe" \

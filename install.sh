@@ -55,6 +55,7 @@ link "$DOTFILES/kitty/nightgrid.conf" "$HOME/.config/kitty/nightgrid.conf"
 link "$DOTFILES/picom/picom.conf"     "$HOME/.config/picom/picom.conf"
 link "$DOTFILES/tmux/tmux.conf"       "$HOME/.tmux.conf"
 link "$DOTFILES/zsh/.zshrc"           "$HOME/.zshrc"
+link "$DOTFILES/cherrytree/config.cfg"     "$HOME/.config/cherrytree/config.cfg"
 
 for f in "$DOTFILES"/rofi/*.rasi; do
     [[ -e "$f" ]] || continue
