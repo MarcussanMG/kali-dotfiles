@@ -19,9 +19,9 @@ done
 [[ ${#entries[@]} -gt 0 ]] || { notify-send "tmux" "No old sessions to restore" 2>/dev/null; exit 0; }
 
 chosen="$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Restore session" \
-    -mesg "Enter: open   Alt+d: kill session   Alt+shift+d: kill ALL" \
-    -kb-custom-1 "Alt+d" \
-    -kb-custom-2 "Alt+shift+d")"
+    -mesg "Enter: open   Ctrl+x: kill session   Ctrl+Alt+x: kill ALL" \
+    -kb-custom-1 "Control+x" \
+    -kb-custom-2 "Control+Alt+x")"
 rc=$?
 [[ -n "$chosen" ]] || exit 0
 
@@ -48,4 +48,4 @@ if [[ $rc -eq 10 ]]; then
     exit 0
 fi
 
-kitty zsh -i -c "tmux -L '$sock' attach-session -t '$session'" &
+kitty tmux -L "$sock" attach-session -t "$session" &

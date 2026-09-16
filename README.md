@@ -241,8 +241,8 @@ This opens `bin/tmux-attach-picker`, which scans every leftover socket in
 `$TMUX_TMPDIR` (or `/tmp/tmux-$UID`) for still-running sessions and lists them in Rofi:
 
 - `Enter` -- reopen the selected session in a new Kitty window
-- `Alt+d` -- kill that session without opening it
-- `Alt+Shift+D` -- kill every leftover session across every window, with a confirmation prompt
+- `Ctrl+x` -- kill that session without opening it
+- `Ctrl+Alt+x` -- kill every leftover session across every window, with a confirmation prompt
 
 Sessions from closed windows stay alive until you either restore or kill them this
 way, or reboot the machine.
