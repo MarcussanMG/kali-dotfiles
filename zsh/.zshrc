@@ -402,20 +402,17 @@ mkt() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════
-#  tmux — attach to the persistent session
+#  tmux — one independent tmux SERVER per Kitty window, no exceptions.
+#  "-L kitty-$$" keys the socket to THIS shell's own PID, which is unique
+#  per Kitty window launch -- true isolation regardless of workspace or
+#  monitor (workspace-based detection broke with multiple monitors, since
+#  i3 reports one focused workspace PER OUTPUT, not one globally).
+#  Super+Enter always opens a brand new, empty session on its own server.
+#  To recover an old session from any window, Super+Shift+Enter
+#  (bin/tmux-attach-picker) scans every leftover socket.
 # ═══════════════════════════════════════════════════════════════════════
-#  tmux — attach to the persistent session, or spin up an independent one
-#  if "main" is already in use by another window
 if command -v tmux >/dev/null && [[ -z "$TMUX" ]] && [[ -n "$PS1" ]]; then
-    if tmux has-session -t main 2>/dev/null; then
-        if [[ -z "$(tmux list-clients -t main 2>/dev/null)" ]]; then
-            tmux attach-session -t main
-        else
-            tmux new-session
-        fi
-    else
-        tmux new-session -s main
-    fi
+    tmux -L "kitty-$$" new-session
 fi
 
 # tabname Nmap → renombra la pestaña y evita que el prompt lo sobreescriba

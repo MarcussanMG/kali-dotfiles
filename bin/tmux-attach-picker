@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Rofi picker: lists sessions across EVERY tmux server (every workspace's
+# "-L wsN" socket), lets you pick one, opens it in a new Kitty window
+# attached to the correct server.
+set -uo pipefail
+
+SOCKET_DIR="${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
+[[ -d "$SOCKET_DIR" ]] || exit 0
+
+entries=()
+for sock in "$SOCKET_DIR"/kitty-*; do
+    [[ -S "$sock" ]] || continue
+    label="$(basename "$sock")"
+    while IFS= read -r line; do
+        entries+=("${label} :: ${line}")
+    done < <(tmux -L "$label" list-sessions -F '#{session_name}  (#{session_windows} windows, created #{session_created_string})' 2>/dev/null)
+done
+
+[[ ${#entries[@]} -gt 0 ]] || { notify-send "tmux" "No hay sesiones antiguas para recuperar" 2>/dev/null; exit 0; }
+
+chosen="$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Recuperar sesión:")"
+[[ -n "$chosen" ]] || exit 0
+
+sock="${chosen%% :: *}"
+rest="${chosen#* :: }"
+session="${rest%%  *}"
+
+kitty zsh -i -c "tmux -L '$sock' attach-session -t '$session'" &
