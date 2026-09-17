@@ -355,20 +355,45 @@ alias tun='ip -4 -brief address show tun0'
 # BloodHound CE (Docker Compose) -- up / down / creds
 BLOODHOUND_COMPOSE="$HOME/tools/ad-exploitation/bloodhound/docker-compose.yml"
 bloodhound() {
+    local dir="${BLOODHOUND_COMPOSE:h}"
     case "$1" in
         up)
-            docker compose -f "$BLOODHOUND_COMPOSE" up -d
+            (cd "$dir" && docker compose up -d)
+            print -P "%F{#86efac}Waiting for the admin password to appear in the logs...%f"
+            local line="" tries=0
+            while (( tries < 30 )); do
+                line="$( (cd "$dir" && docker compose logs bloodhound 2>/dev/null) | grep -i "Initial Password Set To")"
+                [[ -n "$line" ]] && break
+                sleep 2
+                (( tries++ ))
+            done
+            if [[ -n "$line" ]]; then
+                print -P "%F{#4ade80}%f $line"
+            else
+                print -P "%F{#f87171}%f password not visible yet -- run 'bloodhound creds' once the container finishes starting"
+            fi
             ;;
         down)
-            docker compose -f "$BLOODHOUND_COMPOSE" down
+            (cd "$dir" && docker compose down)
             ;;
         creds)
-            docker compose -f "$BLOODHOUND_COMPOSE" logs bloodhound 2>/dev/null \
+            (cd "$dir" && docker compose logs bloodhound 2>/dev/null) \
                 | grep -i "Initial Password Set To" \
-                || print -P "%F{#f87171}%f no password line found -- container may still be starting, or the password was already rotated"
+                || print -P "%F{#f87171}%f no password in the logs -- BloodHound only prints this ONCE, when the admin account is first created. If you already set your own password, use that. If you're truly locked out, 'bloodhound reset' wipes the databases and gives you a fresh one (destroys all imported data)."
+            ;;
+        reset)
+            print -P "%F{#f87171}%fThis destroys ALL BloodHound data (every imported host/edge/session) and generates a brand-new admin password."
+            local confirm
+            read "confirm?Type YES to continue: "
+            if [[ "$confirm" == "YES" ]]; then
+                (cd "$dir" && docker compose down -v)
+                bloodhound up
+            else
+                print -P "%F{#86efac}%fCancelled, nothing was touched."
+            fi
             ;;
         *)
-            print -P "%F{#86efac}Usage:%f bloodhound up|down|creds"
+            print -P "%F{#86efac}Usage:%f bloodhound up|down|creds|reset"
             ;;
     esac
 }

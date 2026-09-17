@@ -77,11 +77,12 @@ echo $E   # first physical interface address
 
 BloodHound CE (Docker, in `~/tools/ad-exploitation/bloodhound/`):
 ```bash
-bloodhound up      # start postgres + neo4j + bloodhound
-bloodhound down    # stop
-bloodhound creds   # print admin password from container logs
+bloodhound up      # start postgres + neo4j + bloodhound; shows the admin password automatically
+bloodhound down    # stop (keeps the databases)
+bloodhound creds   # re-print the admin password from container logs
+bloodhound reset   # wipe the databases and generate a fresh password (destroys all imported data)
 ```
-Login at `http://localhost:8080/ui/login`, user `admin`. One-time password, forces reset on first login. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
+Login at `http://localhost:8080/ui/login`, user `admin`. The password only ever appears in the logs **once**, at the moment the admin account is first created — this is a BloodHound CE design decision, not something this script can work around. `bloodhound down` keeps your data (and the existing password) intact; only `bloodhound reset` (or manually deleting the Docker volumes) generates a new one. Port conflict on 7474/7687 usually means a native Neo4j is already running — check with `sudo ss -tulpn | grep 7474`.
 
 Pentesting notes (CherryTree, synced from [PentestingNotes](https://github.com/MarcussanMG/PentestingNotes)):
 ```bash
