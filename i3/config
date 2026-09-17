@@ -59,6 +59,7 @@ focus_follows_mouse no
 #  Applications
 # ───────────────────────────────────────────────────────────────────────
 bindsym $mod+Return exec kitty
+bindsym $mod+Tab exec rofi -show window -theme ~/.config/rofi/theme.rasi
 bindsym $mod+Shift+Return exec ~/.local/bin/tmux-attach-picker
 bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+Shift+x exec --no-startup-id ~/.local/bin/powermenu
