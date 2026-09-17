@@ -299,10 +299,10 @@ fi
 
 # -- BloodHound CE (Docker Compose) --
 if ! command -v docker >/dev/null; then
-    sudo apt-get install -y docker.io docker-compose-plugin >/dev/null 2>&1
+    sudo apt-get install -y docker.io docker-compose
     sudo systemctl enable --now docker >/dev/null 2>&1
     sudo usermod -aG docker "$USER"
-    info "installed        docker.io + docker-compose-plugin (log out/in for group membership to apply)"
+    info "installed        docker.io + docker-compose (log out/in for group membership to apply)"
 else
     info "already present  docker"
 fi
