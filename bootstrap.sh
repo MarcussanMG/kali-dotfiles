@@ -557,6 +557,14 @@ fi
 
 "$DOTFILES/install.sh"
 
+if [[ ! -L "$HOME/.config/i3/config" ]] || [[ "$(readlink -f "$HOME/.config/i3/config")" != "$(readlink -f "$DOTFILES/i3/config")" ]]; then
+    echo
+    echo "  !!!  i3/config symlink is missing or wrong. install.sh may have been"
+    echo "       interrupted -- run it again manually before logging into i3:"
+    echo "       cd $DOTFILES && ./install.sh"
+    echo
+fi
+
 if ((${#missing[@]})); then
     step "Not available in your repositories"
     printf '  %s\n' "${missing[@]}"
