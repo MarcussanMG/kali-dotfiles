@@ -235,7 +235,7 @@ info "linked           impacket lateral-movement scripts"
 real="$(command -v impacket-secretsdump 2>/dev/null || true)"
 [[ -n "$real" ]] && ln -sf "$real" "$TOOLS/ad-exploitation/credential-dumping/impacket-secretsdump"
 [[ -d /usr/share/windows-resources/mimikatz ]] && \
-    ln -sf /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/credential-dumping/mimikatz" && \
+    ln -sfn /usr/share/windows-resources/mimikatz "$TOOLS/ad-exploitation/credential-dumping/mimikatz" && \
     info "linked           mimikatz/ + impacket-secretsdump into credential-dumping/"
 
 for bin in impacket-GetADUsers impacket-GetADComputers impacket-lookupsid impacket-findDelegation; do
@@ -337,7 +337,7 @@ else
     info "already present  git-dumper"
 fi
 GIT_DUMPER_BIN="$(command -v git-dumper 2>/dev/null || true)"
-[[ -n "$GIT_DUMPER_BIN" ]] && ln -sf "$GIT_DUMPER_BIN" "$TOOLS/exploits/web/git-dumper"
+[[ -n "$GIT_DUMPER_BIN" ]] && { mkdir -p "$TOOLS/exploits/web"; ln -sf "$GIT_DUMPER_BIN" "$TOOLS/exploits/web/git-dumper" || true; }
 
 if ! command -v autorecon >/dev/null; then
     command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
