@@ -15,8 +15,7 @@ info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 [[ $EUID -eq 0 ]] && { echo "Run as your normal user, not root." >&2; exit 1; }
 
 PACKAGES=(
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope
+    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree mitm6 coercer penelope
     # ── Window manager and desktop ──
     i3 i3lock i3blocks suckless-tools dex
     picom feh rofi lxappearance
