@@ -176,6 +176,7 @@ for name in "${!POTATO_URLS[@]}"; do
 done
 
 # -- linux-privesc (linpeas from apt, lse.sh + les.sh from source) --
+mkdir -p "$TOOLS/privesc/linux"
 if [[ -d /usr/share/peass/linpeas ]]; then
     ln -sf /usr/share/peass/linpeas/linpeas.sh "$TOOLS/privesc/linux/linpeas.sh"
     info "linked           linpeas.sh from apt package peass"

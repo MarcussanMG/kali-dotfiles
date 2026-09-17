@@ -28,6 +28,8 @@ mkdir -p \
 link() {
     local src="$1" dst="$2"
 
+    mkdir -p "$(dirname "$dst")"
+
     if [[ -L "$dst" ]]; then
         [[ "$(readlink -f "$dst")" == "$(readlink -f "$src")" ]] && {
             info "already linked  ${dst/#$HOME/~}"
@@ -115,6 +117,11 @@ if [[ -f "$FF_POLICY_SRC" ]]; then
 
     if [[ -n "$FF_DIST_DIR" ]]; then
         sudo mkdir -p "$FF_DIST_DIR"
+        if [[ -f "$FF_DIST_DIR/policies.json" ]] && ! sudo cmp -s "$FF_POLICY_SRC" "$FF_DIST_DIR/policies.json"; then
+            FF_BACKUP_TS="$(date +%Y%m%d-%H%M%S)"
+            sudo cp "$FF_DIST_DIR/policies.json" "$FF_DIST_DIR/policies.json.backup.$FF_BACKUP_TS"
+            warn "backed up       $FF_DIST_DIR/policies.json.backup.$FF_BACKUP_TS"
+        fi
         if sudo cp "$FF_POLICY_SRC" "$FF_DIST_DIR/policies.json"; then
             ok "linked          $FF_DIST_DIR/policies.json"
             info "FoxyProxy + Wappalyzer install on next Firefox launch"

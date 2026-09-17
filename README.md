@@ -45,7 +45,7 @@ Starts Burp, waits for `127.0.0.1:8080`, trusts its CA cert in Firefox, copies a
 ls        eza --icons --group-directories-first
 ll        eza -lah --icons --git
 la        eza -a --icons
-tree      eza --tree --level=2
+tree      eza --tree --icons --level=20
 cat       batcat --paging=never
 cls / c   clear
 .. ... .... cd up N levels
