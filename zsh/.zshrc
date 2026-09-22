@@ -422,6 +422,7 @@ target() {
 mkt() {
     local root="$HOME/engagements/${1:?usage: mkt <name>}"
     mkdir -p "$root"/{nmap,web,loot,exploits}
+    mkdir -p "$root"/privesc/{windows,linux}
     [[ -f "$root/notes.md" ]] || printf '# %s\n\n## Enumeration\n\n## Foothold\n\n## Privilege escalation\n\n' "$1" > "$root/notes.md"
     cd "$root"
 }
