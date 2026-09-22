@@ -115,6 +115,7 @@ extractports nmap/scan.gnmap # extract open ports and copy them to the clipboard
 | `ports` | List listening TCP and UDP sockets. |
 | `serve` | Serve the current directory over HTTP on port 80. |
 | `notes` | Open the synced CherryTree reference notes. |
+| `tools` | Jump to `~/tools` (the arsenal). |
 | `ll` | Detailed directory listing with icons and Git information. |
 | `tree` | Display the directory tree with icons. |
 

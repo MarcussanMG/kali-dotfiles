@@ -349,6 +349,8 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
+alias tools='cd ~/tools'
+
 # ─── Engagement helpers ────────────────────────────────────────────────
 alias tun='ip -4 -brief address show tun0'
 
