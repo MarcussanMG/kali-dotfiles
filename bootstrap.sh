@@ -77,7 +77,10 @@ step "Linking configuration"
 
 step "Building /tools/ arsenal"
 TOOLS="$HOME/tools"
-mkdir -p "$TOOLS"/{recon,windows-privesc,linux-privesc,ad-exploitation,shells-payloads,tunneling-pivoting}
+mkdir -p "$TOOLS"/{recon,ad-exploitation,shells-payloads,tunneling-pivoting}
+# privesc tooling lives under privesc/{windows,linux}; drop the old top-level
+# windows-privesc/linux-privesc dirs left by earlier bootstrap runs (only if empty)
+rmdir "$TOOLS/windows-privesc" "$TOOLS/linux-privesc" 2>/dev/null || true
 
 # -- recon --
 if [[ ! -x "$TOOLS/recon/kerbrute" ]]; then
@@ -173,6 +176,20 @@ for name in "${!POTATO_URLS[@]}"; do
         info "already present  $name"
     fi
 done
+
+# RoguePotato ships as a zip (RoguePotato.exe + its RogueOxidResolver.exe helper)
+if [[ ! -f "$TOOLS/privesc/windows/potatoes/RoguePotato.exe" ]]; then
+    RP_ZIP="$(mktemp --suffix=.zip)"
+    if curl -fsSL "https://github.com/antonioCoco/RoguePotato/releases/download/1.0/RoguePotato.zip" -o "$RP_ZIP" \
+        && unzip -oq "$RP_ZIP" -d "$TOOLS/privesc/windows/potatoes"; then
+        info "downloaded       RoguePotato.exe + RogueOxidResolver.exe"
+    else
+        info "UNAVAILABLE      RoguePotato"; missing+=("RoguePotato")
+    fi
+    rm -f "$RP_ZIP"
+else
+    info "already present  RoguePotato.exe"
+fi
 
 # -- linux-privesc (linpeas from apt, lse.sh + les.sh from source) --
 mkdir -p "$TOOLS/privesc/linux"

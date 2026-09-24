@@ -302,7 +302,7 @@ At i3 session startup, the sync script refreshes `~/.notes-repo` from GitHub and
 |---|---|
 | Reconnaissance | Kerbrute, AutoRecon |
 | Linux privilege escalation | linPEAS, Linux Smart Enumeration, Linux Exploit Suggester |
-| Windows privilege escalation | WinPEAS, PowerUp, PrivescCheck, AccessChk |
+| Windows privilege escalation | WinPEAS, PowerUp, PrivescCheck, AccessChk, PrintSpoofer, GodPotato, RoguePotato |
 | Active Directory | Impacket helpers, BloodHound collectors, PowerView, Certipy |
 | Shells and payloads | Ncat, Plink, web shells, Penelope |
 | Tunneling and pivoting | Ligolo-ng, Chisel, Socat |
