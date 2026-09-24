@@ -147,7 +147,7 @@ else
 fi
 
 mkdir -p "$TOOLS/privesc/windows/ghostpack"
-for bin in Rubeus.exe SharpUp.exe; do
+for bin in Rubeus.exe SharpUp.exe Seatbelt.exe; do
     if [[ ! -f "$TOOLS/privesc/windows/ghostpack/$bin" ]]; then
         curl -fsSL "https://raw.githubusercontent.com/r3motecontrol/Ghostpack-CompiledBinaries/master/$bin" \
             -o "$TOOLS/privesc/windows/ghostpack/$bin" \
@@ -189,6 +189,17 @@ if [[ ! -f "$TOOLS/privesc/windows/potatoes/RoguePotato.exe" ]]; then
     rm -f "$RP_ZIP"
 else
     info "already present  RoguePotato.exe"
+fi
+
+# -- wesng: Windows Exploit Suggester NG (feed it the target's systeminfo output) --
+# single script; run 'python3 wes.py --update' once to fetch the CVE database
+if [[ ! -f "$TOOLS/privesc/windows/wes.py" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/bitsadmin/wesng/master/wes.py" \
+        -o "$TOOLS/privesc/windows/wes.py" && chmod +x "$TOOLS/privesc/windows/wes.py" \
+        && info "downloaded       wes.py (run 'python3 wes.py --update' once to build its DB)" \
+        || { info "UNAVAILABLE      wes.py"; missing+=("wes.py"); }
+else
+    info "already present  wes.py"
 fi
 
 # -- linux-privesc (linpeas from apt, lse.sh + les.sh from source) --
@@ -233,6 +244,18 @@ if command -v unix-privesc-check >/dev/null; then
 else
     info "UNAVAILABLE      unix-privesc-check not found on this system"
 fi
+
+# pspy: watch processes/cron as an unprivileged user (32- and 64-bit target builds)
+for arch in 64 32; do
+    if [[ ! -f "$TOOLS/privesc/linux/pspy$arch" ]]; then
+        curl -fsSL "https://github.com/DominicBreuker/pspy/releases/latest/download/pspy$arch" \
+            -o "$TOOLS/privesc/linux/pspy$arch" && chmod +x "$TOOLS/privesc/linux/pspy$arch" \
+            && info "downloaded       pspy$arch" \
+            || { info "UNAVAILABLE      pspy$arch"; missing+=("pspy$arch"); }
+    else
+        info "already present  pspy$arch"
+    fi
+done
 
 # -- ad-exploitation, organized by attack phase --
 mkdir -p "$TOOLS/ad-exploitation"/{kerberos,lateral-movement,credential-dumping,enumeration,bloodhound/ingestors}
