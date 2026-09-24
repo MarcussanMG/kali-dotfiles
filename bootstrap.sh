@@ -166,6 +166,7 @@ declare -A POTATO_URLS=(
     ["GodPotato-NET2.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET2.exe"
     ["GodPotato-NET35.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET35.exe"
     ["GodPotato-NET4.exe"]="https://github.com/BeichenDream/GodPotato/releases/latest/download/GodPotato-NET4.exe"
+    ["JuicyPotato.exe"]="https://github.com/ohpe/juicy-potato/releases/latest/download/JuicyPotato.exe"
 )
 for name in "${!POTATO_URLS[@]}"; do
     if [[ ! -f "$TOOLS/privesc/windows/potatoes/$name" ]]; then
