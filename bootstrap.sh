@@ -12,6 +12,21 @@ GREEN=$'\e[1;32m'; DIM=$'\e[2;37m'; RESET=$'\e[0m'
 step() { printf '\n%s▸ %s%s\n' "$GREEN" "$1" "$RESET"; }
 info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 
+# progress_bar <current> <total> <label> -- redraws a bar in place on a TTY.
+# Callers should only use it when stdout is a terminal ([[ -t 1 ]]); when piped
+# (e.g. | tee) they should print plain per-item lines instead so the log stays clean.
+progress_bar() {
+    local cur=$1 total=$2 label=${3:-} width=28 pct filled
+    if (( total > 0 )); then pct=$(( cur * 100 / total )); filled=$(( cur * width / total ))
+    else pct=100; filled=$width; fi
+    local fbar ebar
+    fbar="$(printf '%*s' "$filled" '' | tr ' ' '#')"
+    ebar="$(printf '%*s' "$(( width - filled ))" '' | tr ' ' '-')"
+    fbar="${fbar//#/█}"; ebar="${ebar//-/░}"
+    printf '\r  %s%s%s%s%s %3d%%  (%d/%d) %-22.22s' \
+        "$GREEN" "$fbar" "$DIM" "$ebar" "$RESET" "$pct" "$cur" "$total" "$label"
+}
+
 [[ $EUID -eq 0 ]] && { echo "Run as your normal user, not root." >&2; exit 1; }
 
 PACKAGES=(
@@ -42,17 +57,27 @@ sudo apt-get update
 
 step "Installing packages"
 # Installed one at a time so a single unavailable package cannot abort the run.
+# On a terminal, show a single in-place progress bar; when piped (| tee), fall
+# back to one plain line per package so the log stays readable.
 missing=()
+pkg_total=${#PACKAGES[@]}
+pkg_i=0
 for pkg in "${PACKAGES[@]}"; do
+    pkg_i=$(( pkg_i + 1 ))
     if dpkg -s "$pkg" >/dev/null 2>&1; then
-        info "already present  $pkg"
+        status="already present"
     elif sudo apt-get install -y --no-install-recommends "$pkg" >/dev/null 2>&1; then
-        printf '  installed       %s\n' "$pkg"
+        status="installed"
     else
-        missing+=("$pkg")
-        printf '  UNAVAILABLE     %s\n' "$pkg"
+        missing+=("$pkg"); status="UNAVAILABLE"
+    fi
+    if [[ -t 1 ]]; then
+        progress_bar "$pkg_i" "$pkg_total" "$pkg"
+    else
+        printf '  %-15s %s\n' "$status" "$pkg"
     fi
 done
+[[ -t 1 ]] && printf '  %sdone%s\n' "$GREEN" "$RESET"
 
 step "Installing JetBrainsMono Nerd Font"
 FONT_DIR="$HOME/.local/share/fonts"
@@ -62,7 +87,12 @@ else
     mkdir -p "$FONT_DIR"
     tmp="$(mktemp -d)"
     url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
-    if curl -fsSL "$url" -o "$tmp/JetBrainsMono.zip"; then
+    # ~30 MB zip with many variants -- show it's working (progress bar on a TTY,
+    # silent when piped) so the step doesn't look frozen on first run.
+    info "downloading (~30 MB, may take a minute)..."
+    if { [[ -t 1 ]] && curl -#fL "$url" -o "$tmp/JetBrainsMono.zip"; } \
+        || { [[ ! -t 1 ]] && curl -fsSL "$url" -o "$tmp/JetBrainsMono.zip"; }; then
+        info "extracting and refreshing the font cache..."
         unzip -qo "$tmp/JetBrainsMono.zip" -d "$FONT_DIR/JetBrainsMono" \
             -x "*.txt" "*.md" "LICENSE*"
         fc-cache -f "$FONT_DIR" >/dev/null
@@ -624,3 +654,11 @@ cat <<'MSG'
       chsh -s "$(command -v zsh)"
 
 MSG
+
+# Drop into a fresh zsh so the new config is active immediately. This can only
+# work by replacing the shell (a 'source' from inside this bash child can't
+# touch your interactive shell). Only on a TTY; skipped when piped (| tee).
+if [[ -t 1 ]] && command -v zsh >/dev/null; then
+    step "Starting zsh with your new configuration"
+    exec zsh
+fi
