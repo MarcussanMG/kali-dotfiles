@@ -77,11 +77,15 @@ for pkg in "${PACKAGES[@]}"; do
         printf '  %-15s %s\n' "$status" "$pkg"
     fi
 done
-[[ -t 1 ]] && printf '  %sdone%s\n' "$GREEN" "$RESET"
+# close the progress-bar line (it ends in \r without a newline)
+[[ -t 1 ]] && printf '\n'
 
 step "Installing JetBrainsMono Nerd Font"
 FONT_DIR="$HOME/.local/share/fonts"
-if fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd Font"; then
+# already installed if the font dir exists and is non-empty (covers .ttf/.otf/
+# any layout), or fontconfig already knows the family.
+if [[ -d "$FONT_DIR/JetBrainsMono" && -n "$(ls -A "$FONT_DIR/JetBrainsMono" 2>/dev/null)" ]] \
+    || fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd Font"; then
     info "already present"
 else
     mkdir -p "$FONT_DIR"
