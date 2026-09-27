@@ -35,6 +35,7 @@ PACKAGES=(
     i3 i3lock i3blocks suckless-tools dex
     picom feh rofi lxappearance
     network-manager-gnome dunst libnotify-bin
+    python3-i3ipc
     # ── Terminal ──
     kitty tmux zsh
     zsh-autosuggestions zsh-syntax-highlighting

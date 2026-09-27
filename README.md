@@ -162,6 +162,7 @@ Reload i3 with `Super + Shift + C`.
 |---|---|
 | `Super + Enter` | Open Kitty with a fresh tmux session. |
 | `Super + D` | Open the application launcher. |
+| `Alt + Tab` | Instantly switch to the previous window (tap again to toggle back). |
 | `Super + Shift + F` | Open Firefox. |
 | `Super + Shift + B` | Open Burp Suite. |
 | `Super + Shift + T` | Set the target through Rofi. |

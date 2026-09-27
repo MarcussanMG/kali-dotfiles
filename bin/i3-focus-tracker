@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+# Focus-history daemon for a Windows-style instant Alt+Tab on i3.
+#
+# It remembers the order in which windows were focused. When it receives an
+# i3 "tick" with payload "alttab" (sent by the Alt+Tab keybinding via
+# `i3-msg -t send_tick alttab`), it focuses the previously-focused window.
+# Pressing Alt+Tab again toggles back -- exactly like a quick Alt+Tab in
+# Windows. No menu, no Enter.
+#
+# Single-instance: a non-blocking flock means i3's `exec_always` can re-run
+# this on every reload without ever spawning a duplicate.
+import fcntl
+import sys
+
+try:
+    import i3ipc
+except ImportError:
+    sys.stderr.write("i3-focus-tracker: python3-i3ipc is not installed\n")
+    sys.exit(1)
+
+_lock = open("/tmp/i3-focus-tracker.lock", "w")
+try:
+    fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except OSError:
+    sys.exit(0)  # another instance already owns the lock
+
+history = []  # container ids, most-recently-focused last
+
+
+def remember(con_id):
+    if con_id in history:
+        history.remove(con_id)
+    history.append(con_id)
+    del history[:-20]
+
+
+def on_focus(i3, event):
+    con = event.container
+    if con is not None and con.id is not None:
+        remember(con.id)
+
+
+def on_tick(i3, event):
+    if getattr(event, "payload", "") == "alttab" and len(history) >= 2:
+        target = history[-2]
+        i3.command(f"[con_id={target}] focus")
+
+
+def main():
+    i3 = i3ipc.Connection()
+    focused = i3.get_tree().find_focused()
+    if focused is not None:
+        remember(focused.id)
+    i3.on("window::focus", on_focus)
+    i3.on("tick", on_tick)
+    i3.main()
+
+
+if __name__ == "__main__":
+    main()

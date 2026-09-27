@@ -37,6 +37,8 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.local/bin/lockscreen
 exec --no-startup-id nm-applet
 exec_always --no-startup-id feh --bg-fill ~/.dotfiles/wallpapers/nightgrid.png
 exec_always --no-startup-id ~/.local/bin/start-picom
+# focus-history daemon that powers the instant Alt+Tab (single-instance)
+exec_always --no-startup-id ~/.local/bin/i3-focus-tracker
 exec --no-startup-id ~/.local/bin/sync-notes.sh
 
 # ───────────────────────────────────────────────────────────────────────
@@ -59,7 +61,8 @@ focus_follows_mouse no
 #  Applications
 # ───────────────────────────────────────────────────────────────────────
 bindsym $mod+Return exec kitty
-bindsym $mod+Tab exec rofi -show window -theme ~/.config/rofi/theme.rasi
+# Windows-style instant Alt+Tab: jump to the previous window, tap again to toggle back
+bindsym Mod1+Tab exec --no-startup-id i3-msg -t send_tick alttab
 bindsym $mod+Shift+Return exec ~/.local/bin/tmux-attach-picker
 bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+Shift+x exec --no-startup-id ~/.local/bin/powermenu
