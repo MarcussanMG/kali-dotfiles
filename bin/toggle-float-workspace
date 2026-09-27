@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+# Toggle the focused i3 workspace between tiling and "all floating".
+import json
+import subprocess
+import sys
+
+
+def i3(*args):
+    return subprocess.run(["i3-msg", *args], capture_output=True, text=True).stdout
+
+
+def focused_workspace(node, ws=None):
+    if node.get("type") == "workspace":
+        ws = node
+    if node.get("focused"):
+        return ws
+    for child in node.get("nodes", []) + node.get("floating_nodes", []):
+        found = focused_workspace(child, ws)
+        if found:
+            return found
+    return None
+
+
+def has_tiled_window(node):
+    for child in node.get("nodes", []):
+        if child.get("window") and not child.get("nodes"):
+            return True
+        if has_tiled_window(child):
+            return True
+    return False
+
+
+def main():
+    try:
+        tree = json.loads(i3("-t", "get_tree"))
+    except (json.JSONDecodeError, OSError):
+        sys.exit(0)
+    ws = focused_workspace(tree)
+    if ws is None:
+        sys.exit(0)
+    action = "enable" if has_tiled_window(ws) else "disable"
+    i3(f"[workspace=__focused__] floating {action}")
+
+
+if __name__ == "__main__":
+    main()

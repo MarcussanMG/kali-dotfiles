@@ -240,3 +240,6 @@ bar {
         binding_mode        $yellow     $yellow     $bg
     }
 }
+
+# float/tile every window on the current workspace (classic stacking-WM feel)
+bindsym $mod+t exec --no-startup-id ~/.local/bin/toggle-float-workspace

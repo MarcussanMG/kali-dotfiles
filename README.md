@@ -184,6 +184,7 @@ Reload i3 with `Super + Shift + C`.
 | `Super + H` / `Super + V` | Choose horizontal or vertical splitting. |
 | `Super + F` | Toggle fullscreen. |
 | `Super + Shift + Space` | Toggle floating mode. |
+| `Super + T` | Toggle the whole current workspace between tiling and all-floating (classic stacking-WM feel). |
 | `Super + Space` | Switch focus between tiling and floating windows. |
 | `Super + A` | Focus the parent container. |
 | `Super + S` / `Super + W` | Use stacking or tabbed layout. |
