@@ -1,5 +1,12 @@
 {
   "policies": {
+    "RequestedLocales": ["en-US"],
+    "Preferences": {
+      "intl.accept_languages": {
+        "Value": "en-US, en",
+        "Status": "locked"
+      }
+    },
     "ExtensionSettings": {
       "foxyproxy@eric.h.jung": {
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/foxyproxy-standard/latest.xpi",
