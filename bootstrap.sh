@@ -68,6 +68,31 @@ PKG_NOTES=( cherrytree )
 # A plain run (or no TTY / no whiptail) installs everything. "Custom" shows a
 # checklist: arrows to move, SPACE to toggle, ENTER to confirm.
 if [[ -t 0 ]] && command -v whiptail >/dev/null; then
+    # nightgrid palette for the newt/whiptail dialogs (green on dark)
+    export NEWT_COLORS='
+root=,black
+window=green,black
+border=brightgreen,black
+shadow=,black
+title=brightgreen,black
+button=black,green
+actbutton=black,brightgreen
+compactbutton=brightgreen,black
+checkbox=green,black
+actcheckbox=black,brightgreen
+entry=brightgreen,black
+label=brightgreen,black
+listbox=green,black
+actlistbox=black,green
+sellistbox=brightgreen,black
+actsellistbox=black,brightgreen
+textbox=green,black
+acttextbox=black,green
+helpline=green,black
+roottext=brightgreen,black
+emptyscale=,black
+fullscale=,green
+'
     _mode=$(whiptail --title "kali-dotfiles installer" --menu \
         "The desktop + shell (core) is always installed. Choose how to proceed:" \
         14 72 2 \
