@@ -39,6 +39,15 @@ When it finishes: **log out → pick the i3 session → log back in.** Set Zsh a
 chsh -s "$(command -v zsh)"
 ```
 
+<details>
+<summary><strong>Where to select the i3 session</strong></summary>
+
+<p align="center">
+  <img src="i3_config.png" alt="Selecting the i3 desktop session at login" width="350">
+</p>
+
+</details>
+
 ## Keyboard shortcuts
 
 `Super` = Windows key (Mod4). `Alt` = Mod1.
@@ -114,6 +123,18 @@ Each Kitty window gets its **own isolated tmux server** (keyed to the shell PID)
 | Exploits | git-dumper, Evil-Macro, AutoBlue-MS17-010 |
 
 Some come from Kali packages, others from upstream releases. Check the bootstrap output for anything marked `UNAVAILABLE`. See [bootstrap.sh](bootstrap.sh) for the full list and sources.
+
+## Burp Suite & Firefox
+
+Launch Firefox once to create its profile, then run:
+
+```bash
+~/.dotfiles/bin/setup-burp.sh
+```
+
+The helper starts Burp if needed, waits for its proxy, imports Burp's CA certificate into Firefox, and copies a FoxyProxy import string to the clipboard — paste it into **FoxyProxy → Options → Import Proxy List**. Complete Burp's project setup when prompted.
+
+Firefox policies preinstall **FoxyProxy**, **Wappalyzer**, **Dark Reader** and **HackTools**, and force the interface and search language to English. Certificate import needs `libnss3-tools` (part of the core package list).
 
 ## Customization
 
