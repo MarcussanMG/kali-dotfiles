@@ -222,6 +222,10 @@ typeset -g NG_TAB_LOCKED=0
 precmd() {
     vcs_info
     ng_refresh_net_vars
+    # keep $T in sync with the shared target file so every tab shows (and
+    # uses) the same target -- setting it in one tab updates them all next prompt
+    local _tf="${XDG_CACHE_HOME:-$HOME/.cache}/oscp-target"
+    if [[ -s "$_tf" ]]; then export T="${$(<$_tf)//[[:space:]]/}"; else unset T; fi
     (( NG_TAB_LOCKED )) || print -Pnr -- "$TERM_TITLE"
     if [ "$NEWLINE_BEFORE_PROMPT" = yes ]; then
         if [ -z "$_NEW_LINE_BEFORE_PROMPT" ]; then
