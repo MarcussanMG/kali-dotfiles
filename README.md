@@ -54,6 +54,8 @@ cd ~/.dotfiles
 ./bootstrap.sh
 ```
 
+`bootstrap.sh` offers a **full install** or a **custom** one. Custom opens a checklist (arrows to move, Space to toggle, Enter to confirm) to pick the optional components — pentest arsenal, SecLists, notes sync, Postman; the core desktop and shell are always installed. A non-interactive run installs everything.
+
 Log out, choose **i3** at the login screen, and log back in.
 
 <details>

@@ -29,8 +29,17 @@ progress_bar() {
 
 [[ $EUID -eq 0 ]] && { echo "Run as your normal user, not root." >&2; exit 1; }
 
-PACKAGES=(
-    rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells cherrytree mitm6 coercer penelope
+# ── Component selection ────────────────────────────────────────────────
+# All optional components default ON (a plain ./bootstrap.sh installs
+# everything). The Custom installer menu flips these before packages build.
+OPT_ARSENAL=1     # /tools pentest arsenal + offensive apt packages
+OPT_SECLISTS=1    # SecLists wordlists (large)
+OPT_NOTES=1       # CherryTree notes sync + the cherrytree app
+OPT_POSTMAN=1     # Postman
+
+# Core packages: the desktop + shell that make this environment usable. A
+# failure in one of these is CRITICAL -- the workstation won't work without it.
+PKG_CORE=(
     # ── Window manager and desktop ──
     i3 i3lock i3blocks suckless-tools dex
     picom feh rofi lxappearance
@@ -45,13 +54,48 @@ PACKAGES=(
     x11-utils xclip maim imagemagick xss-lock libnss3-tools
     # ── Fonts and icons ──
     fonts-font-awesome papirus-icon-theme
-    # ── Offensive tooling ──
-    seclists
     # ── VMware guest integration ──
     open-vm-tools open-vm-tools-desktop
-    # ── Base ──
-    git curl wget unzip
+    # ── Base (whiptail powers the Custom installer menu) ──
+    git curl wget unzip whiptail
 )
+# Optional package groups, added to the install list only when enabled.
+PKG_ARSENAL=( rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope )
+PKG_SECLISTS=( seclists )
+PKG_NOTES=( cherrytree )
+
+# ── Installer mode: Full or Custom ─────────────────────────────────────
+# A plain run (or no TTY / no whiptail) installs everything. "Custom" shows a
+# checklist: arrows to move, SPACE to toggle, ENTER to confirm.
+if [[ -t 0 ]] && command -v whiptail >/dev/null; then
+    _mode=$(whiptail --title "kali-dotfiles installer" --menu \
+        "The desktop + shell (core) is always installed. Choose how to proceed:" \
+        14 72 2 \
+        "full"   "Install everything (core + all optional tools)" \
+        "custom" "Choose which optional components to install" \
+        3>&1 1>&2 2>&3) || _mode="full"
+    if [[ "$_mode" == "custom" ]]; then
+        _sel=$(whiptail --title "Optional components" --checklist \
+            "SPACE toggles, ENTER confirms. Unchecked components are skipped." \
+            15 74 4 \
+            "arsenal"  "Pentest arsenal (/tools: recon, privesc, AD, exploits)" ON \
+            "seclists" "SecLists wordlists (large download)"                    ON \
+            "notes"    "CherryTree notes sync + cherrytree app"                 ON \
+            "postman"  "Postman"                                                ON \
+            3>&1 1>&2 2>&3) || _sel='arsenal seclists notes postman'
+        OPT_ARSENAL=0; OPT_SECLISTS=0; OPT_NOTES=0; OPT_POSTMAN=0
+        [[ "$_sel" == *arsenal*  ]] && OPT_ARSENAL=1
+        [[ "$_sel" == *seclists* ]] && OPT_SECLISTS=1
+        [[ "$_sel" == *notes*    ]] && OPT_NOTES=1
+        [[ "$_sel" == *postman*  ]] && OPT_POSTMAN=1
+    fi
+fi
+info "components -> arsenal:$OPT_ARSENAL seclists:$OPT_SECLISTS notes:$OPT_NOTES postman:$OPT_POSTMAN"
+
+PACKAGES=( "${PKG_CORE[@]}" )
+(( OPT_ARSENAL ))  && PACKAGES+=( "${PKG_ARSENAL[@]}" )
+(( OPT_SECLISTS )) && PACKAGES+=( "${PKG_SECLISTS[@]}" )
+(( OPT_NOTES ))    && PACKAGES+=( "${PKG_NOTES[@]}" )
 
 step "Updating package lists"
 sudo apt-get update
@@ -61,6 +105,7 @@ step "Installing packages"
 # On a terminal, show a single in-place progress bar; when piped (| tee), fall
 # back to one plain line per package so the log stays readable.
 missing=()
+missing_core=()
 pkg_total=${#PACKAGES[@]}
 pkg_i=0
 for pkg in "${PACKAGES[@]}"; do
@@ -69,6 +114,8 @@ for pkg in "${PACKAGES[@]}"; do
         status="already present"
     elif sudo apt-get install -y --no-install-recommends "$pkg" >/dev/null 2>&1; then
         status="installed"
+    elif [[ " ${PKG_CORE[*]} " == *" $pkg "* ]]; then
+        missing_core+=("$pkg"); status="UNAVAILABLE"
     else
         missing+=("$pkg"); status="UNAVAILABLE"
     fi
@@ -110,6 +157,7 @@ fi
 
 step "Linking configuration"
 
+if (( OPT_ARSENAL )); then
 step "Building /tools/ arsenal"
 TOOLS="$HOME/tools"
 mkdir -p "$TOOLS"/{recon,ad-exploitation,shells-payloads,tunneling-pivoting}
@@ -580,8 +628,10 @@ fi
 
 info "dnscat2 has no official Windows .exe -- the client side is dnscat2.ps1, PowerShell-only. Not linked."
 info "BloodHound UI is now Docker/web-based (Community Edition). Run: sudo apt install bloodhound && sudo bloodhound-setup"
+fi
 
 
+if (( OPT_NOTES )); then
 step "Syncing pentesting notes (CherryTree)"
 NOTES_DIR="$HOME/.notes-repo"
 NOTES_REPO="https://github.com/MarcussanMG/PentestingNotes.git"
@@ -602,8 +652,10 @@ else
         missing+=("CherryTreePentestingNotes")
     fi
 fi
+fi
 
 
+if (( OPT_POSTMAN )); then
 step "Installing Postman"
 if [[ -x /usr/local/bin/postman ]]; then
     info "already present  postman"
@@ -630,6 +682,7 @@ DESKTOP
         rm -f "$TMPTAR"
     fi
 fi
+fi
 
 "$DOTFILES/install.sh"
 
@@ -645,6 +698,12 @@ if ((${#missing[@]})); then
     step "Not available in your repositories"
     printf '  %s\n' "${missing[@]}"
     info "Everything else installed fine; these are optional."
+fi
+
+if ((${#missing_core[@]})); then
+    printf '\n%s  !!!  CRITICAL: core packages failed to install%s\n' "$GREEN" "$RESET"
+    printf '       %s\n' "${missing_core[@]}"
+    printf '       The desktop/shell may not work. Fix these and re-run bootstrap.\n\n'
 fi
 
 step "Bootstrap complete"
