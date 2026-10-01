@@ -99,6 +99,23 @@ Firefox policies preinstall **FoxyProxy**, **Wappalyzer**, **Dark Reader** and *
 | `Super + Shift + l` | Lock screen |
 | `Super + Shift + p` | Toggle Picom effects |
 
+### tmux — prefix `Ctrl + a`
+| Key | Action |
+|---|---|
+| `Ctrl+a` `/` | Split pane side by side |
+| `Ctrl+a` `-` | Split pane stacked |
+| `Ctrl+a` `←/↓/↑/→` | Move between panes |
+| `Ctrl+a` `m` | Swap with another pane (by number) |
+| `Ctrl+a` `t` | Set pane title |
+| `Ctrl+a` `n` / `N` | New named session / rename session |
+| `Ctrl+a` `q` | Kill the session (asks first) |
+| `Ctrl+a` `S` | Toggle the status bar |
+| `Ctrl+a` `r` | Reload tmux config |
+| `Ctrl+a` `[` | Copy mode — `Space` starts selection, `Enter` copies to the system clipboard |
+| `Ctrl+a` `d` | Detach (reattach from `Super + Shift + Enter`) |
+
+Mouse support is on: click to select panes, drag borders to resize, scroll to enter copy mode.
+
 ## Shell helpers
 
 | Command | Action |
