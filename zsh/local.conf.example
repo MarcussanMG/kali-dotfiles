@@ -1,0 +1,11 @@
+# Per-machine overrides for the OSCP workstation shell.
+# Copy this to ~/.config/ng/local.conf  (mkdir -p ~/.config/ng) and edit.
+# Values set here win over the defaults baked into .zshrc.
+
+# VPN interface used for $V and shown in the prompt. Default: tun0
+# NG_VPN_IF=tun0
+
+# Extra flags forced into the hashcat wrapper. The default "-D 1" pins hashcat
+# to the CPU device, which is what works inside a GPU-less VMware guest. On a
+# host with a real GPU, set it empty to let hashcat auto-detect:
+# NG_HASHCAT_OPTS=""

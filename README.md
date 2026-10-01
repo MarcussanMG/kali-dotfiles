@@ -361,7 +361,8 @@ bash -n ~/.dotfiles/install.sh
 bash -n ~/.dotfiles/bootstrap.sh
 
 for script in ~/.dotfiles/bin/* ~/.dotfiles/i3blocks/scripts/* ~/.dotfiles/tmux/scripts/*; do
-    bash -n "$script"
+    [[ -f "$script" ]] || continue
+    head -1 "$script" | grep -qE 'bash|/sh|env sh' && bash -n "$script"
 done
 ```
 

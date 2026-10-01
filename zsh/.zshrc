@@ -91,27 +91,34 @@ zstyle ':vcs_info:git:*' unstagedstr "%F{$NG_YELLOW}!%f"
 zstyle ':vcs_info:git:*' formats     "%F{$NG_GREEN_DIM}─[%f%F{$NG_FG_DIM}󰘬 %b%f%u%c%F{$NG_GREEN_DIM}]%f"
 zstyle ':vcs_info:git:*' actionformats "%F{$NG_GREEN_DIM}─[%f%F{$NG_YELLOW}󰘬 %b|%a%f%F{$NG_GREEN_DIM}]%f"
 
-# tun0 address, cached so the prompt never shells out more than once
-# every 10 seconds.
+# ─── Per-machine overrides (optional) ──────────────────────────────────
+# Copy zsh/local.conf.example to ~/.config/ng/local.conf to override these
+# per machine without touching the tracked dotfiles.
+[[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/ng/local.conf" ]] && \
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/ng/local.conf"
+: "${NG_VPN_IF:=tun0}"
+: "${NG_HASHCAT_OPTS:=-D 1}"
+
+# VPN interface address, cached so the prompt never shells out more than
+# once every 10 seconds.
 typeset -g NG_TUN=""
 typeset -g NG_TUN_AT=-99   # negative so the first prompt fetches immediately
 ng_tun_ip() {
     # $SECONDS is a shell builtin — no module required.
     if (( SECONDS - NG_TUN_AT >= 10 )); then
-        NG_TUN=$(ip -4 -brief address show tun0 2>/dev/null | awk '{print $3}' | cut -d/ -f1)
+        NG_TUN=$(ip -4 -brief address show "$NG_VPN_IF" 2>/dev/null | awk '{print $3}' | cut -d/ -f1)
         NG_TUN_AT=$SECONDS
     fi
     [[ -n "$NG_TUN" ]] && \
         print -n "%F{$NG_GREEN_DIM}─[%f%F{$NG_GREEN_HI}󰦝 ${NG_TUN}%f%F{$NG_GREEN_DIM}]%f"
 }
 
-# Current engagement target, if one is set.
+# Current engagement target. Shows $T -- the target THIS shell will actually
+# use in commands -- not the global file, so the prompt never disagrees with
+# the value your commands expand. Each shell keeps its own $T.
 ng_target() {
-    local f="${XDG_CACHE_HOME:-$HOME/.cache}/oscp-target"
-    [[ -s "$f" ]] || return
-    local t="${$(<$f)//[[:space:]]/}"
-    [[ -n "$t" ]] && \
-        print -n "%F{$NG_GREEN_DIM}─[%f%F{$NG_YELLOW} ${t}%f%F{$NG_GREEN_DIM}]%f"
+    [[ -n "$T" ]] && \
+        print -n "%F{$NG_GREEN_DIM}─[%f%F{$NG_YELLOW} ${T}%f%F{$NG_GREEN_DIM}]%f"
 }
 
 # tun0 and physical-interface addresses, exposed as plain variables ($V, $E)
@@ -121,7 +128,7 @@ typeset -g NG_ETH=""
 typeset -g NG_ETH_AT=-99
 ng_refresh_net_vars() {
     if (( SECONDS - NG_TUN_AT >= 10 )); then
-        NG_TUN=$(ip -4 -brief address show tun0 2>/dev/null | awk '{print $3}' | cut -d/ -f1)
+        NG_TUN=$(ip -4 -brief address show "$NG_VPN_IF" 2>/dev/null | awk '{print $3}' | cut -d/ -f1)
         NG_TUN_AT=$SECONDS
     fi
     export V="$NG_TUN"
@@ -352,7 +359,7 @@ alias ....='cd ../../..'
 alias tools='cd ~/tools'
 
 # ─── Engagement helpers ────────────────────────────────────────────────
-alias tun='ip -4 -brief address show tun0'
+alias tun='ip -4 -brief address show "$NG_VPN_IF"'
 
 # BloodHound CE (Docker Compose) -- up / down / creds
 BLOODHOUND_COMPOSE="$HOME/tools/ad-exploitation/bloodhound/docker-compose.yml"
@@ -498,5 +505,5 @@ extractports() {
 export RUSTICL_ENABLE=llvmpipe
 
 hashcat() {
-    command /usr/bin/hashcat -D 1 "$@"
+    command /usr/bin/hashcat ${=NG_HASHCAT_OPTS} "$@"
 }
