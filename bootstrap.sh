@@ -745,6 +745,12 @@ if [[ -f "$NVIM_REPO/install.sh" ]]; then
     ( cd "$NVIM_REPO" && bash ./install.sh ) \
         && info "installed        Neovim config (nightgrid.nvim)" \
         || info "UNAVAILABLE      nightgrid.nvim installer failed"
+    if command -v nvim >/dev/null; then
+        info "syncing Neovim plugins (headless Lazy sync)..."
+        nvim --headless "+Lazy! sync" +qa >/dev/null 2>&1 || true
+        # LSP servers install themselves on first launch
+        # (mason-lspconfig ensure_installed + automatic_installation).
+    fi
 fi
 fi
 
