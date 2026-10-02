@@ -57,7 +57,7 @@ PKG_CORE=(
     # ── VMware guest integration ──
     open-vm-tools open-vm-tools-desktop
     # ── Base (whiptail powers the Custom installer menu) ──
-    git curl wget unzip whiptail python3-rich
+    git curl wget unzip whiptail grc python3-rich
 )
 # Optional package groups, added to the install list only when enabled.
 PKG_ARSENAL=( rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope )

@@ -414,6 +414,18 @@ alias myip='ip -4 -brief address show | grep -v " lo "'
 alias ports='ss -tulpn'
 alias serve='python3 -m http.server 80'
 
+# ─── grc: colourise nmap & network tools ───────────────────────────────
+# Only colourises on a TTY (--colour=auto), so piped/redirected output
+# (nmap -oG, | tee, extractports) stays plain. The sudo alias lets the
+# word after sudo be alias-expanded, so `sudo nmap` colourises too.
+if command -v grc >/dev/null; then
+    alias sudo='sudo '
+    alias nmap='grc --colour=auto nmap'
+    alias ping='grc --colour=auto ping'
+    alias traceroute='grc --colour=auto traceroute'
+    alias dig='grc --colour=auto dig'
+fi
+
 # target            → print the current target
 # target 10.10.11.5 → set it, export $T, refresh the i3 bar
 target() {
