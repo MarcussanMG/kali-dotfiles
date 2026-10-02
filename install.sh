@@ -133,6 +133,12 @@ if [[ -f "$FF_POLICY_SRC" ]]; then
     fi
 fi
 
+# ─── Rich tracebacks for every Python program ─────────────────────────
+if [[ -f "$DOTFILES/python/usercustomize.py" ]]; then
+    USERSITE="$(python3 -m site --user-site 2>/dev/null)"
+    [[ -n "$USERSITE" ]] && link "$DOTFILES/python/usercustomize.py" "$USERSITE/usercustomize.py"
+fi
+
 # ─── Default shell ─────────────────────────────────────────────────────
 if [[ "${SHELL##*/}" != "zsh" ]] && command -v zsh >/dev/null; then
     warn "default shell is ${SHELL##*/} — run: chsh -s \$(command -v zsh)"
