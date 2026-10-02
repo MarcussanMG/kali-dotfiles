@@ -36,6 +36,7 @@ OPT_ARSENAL=1     # /tools pentest arsenal + offensive apt packages
 OPT_SECLISTS=1    # SecLists wordlists (large)
 OPT_NOTES=1       # CherryTree notes sync + the cherrytree app
 OPT_POSTMAN=1     # Postman
+OPT_NVIM=1        # Neovim config (nightgrid.nvim)
 
 # Core packages: the desktop + shell that make this environment usable. A
 # failure in one of these is CRITICAL -- the workstation won't work without it.
@@ -102,20 +103,22 @@ fullscale=,green
     if [[ "$_mode" == "custom" ]]; then
         _sel=$(whiptail --title "Optional components" --checklist \
             "SPACE toggles, ENTER confirms. Unchecked components are skipped." \
-            15 74 4 \
+            16 74 5 \
             "arsenal"  "Pentest arsenal (/tools: recon, privesc, AD, exploits)" ON \
             "seclists" "SecLists wordlists (large download)"                    ON \
             "notes"    "CherryTree notes sync + cherrytree app"                 ON \
             "postman"  "Postman"                                                ON \
-            3>&1 1>&2 2>&3) || _sel='arsenal seclists notes postman'
-        OPT_ARSENAL=0; OPT_SECLISTS=0; OPT_NOTES=0; OPT_POSTMAN=0
+            "nvim"     "Neovim config (nightgrid.nvim: LSP, Telescope, theme)"  ON \
+            3>&1 1>&2 2>&3) || _sel='arsenal seclists notes postman nvim'
+        OPT_ARSENAL=0; OPT_SECLISTS=0; OPT_NOTES=0; OPT_POSTMAN=0; OPT_NVIM=0
         [[ "$_sel" == *arsenal*  ]] && OPT_ARSENAL=1
         [[ "$_sel" == *seclists* ]] && OPT_SECLISTS=1
         [[ "$_sel" == *notes*    ]] && OPT_NOTES=1
         [[ "$_sel" == *postman*  ]] && OPT_POSTMAN=1
+        [[ "$_sel" == *nvim*     ]] && OPT_NVIM=1
     fi
 fi
-info "components -> arsenal:$OPT_ARSENAL seclists:$OPT_SECLISTS notes:$OPT_NOTES postman:$OPT_POSTMAN"
+info "components -> arsenal:$OPT_ARSENAL seclists:$OPT_SECLISTS notes:$OPT_NOTES postman:$OPT_POSTMAN nvim:$OPT_NVIM"
 
 PACKAGES=( "${PKG_CORE[@]}" )
 (( OPT_ARSENAL ))  && PACKAGES+=( "${PKG_ARSENAL[@]}" )
@@ -178,6 +181,19 @@ else
         info "download failed — install it manually from nerdfonts.com"
     fi
     rm -rf "$tmp"
+fi
+
+step "Installing fzf-tab (fzf completion menu)"
+# Searchable fzf picker for tab-completion. Not in the Kali repos; clone it.
+# Non-fatal: the shell works fine without it.
+FZF_TAB_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fzf-tab"
+if [[ -d "$FZF_TAB_DIR/.git" ]]; then
+    git -C "$FZF_TAB_DIR" pull --quiet --ff-only 2>/dev/null \
+        && info "updated          fzf-tab" || info "fzf-tab already present"
+elif git clone --quiet --depth 1 https://github.com/Aloxaf/fzf-tab.git "$FZF_TAB_DIR" 2>/dev/null; then
+    info "installed        fzf-tab"
+else
+    info "UNAVAILABLE      fzf-tab (clone failed)"
 fi
 
 step "Linking configuration"
@@ -706,6 +722,29 @@ DESKTOP
         missing+=("postman")
         rm -f "$TMPTAR"
     fi
+fi
+fi
+
+if (( OPT_NVIM )); then
+step "Installing Neovim config (nightgrid.nvim)"
+# Clone the Neovim config repo and run ITS installer, which installs a
+# compatible neovim (if needed) plus LSP deps and copies the config into
+# ~/.config/nvim. Non-fatal: the workstation works without it.
+NVIM_REPO="$HOME/tools/nightgrid.nvim"
+mkdir -p "$HOME/tools"
+if [[ -d "$NVIM_REPO/.git" ]]; then
+    git -C "$NVIM_REPO" pull --quiet --ff-only 2>/dev/null \
+        && info "updated repo      nightgrid.nvim" || info "repo already present"
+elif git clone --quiet https://github.com/MarcussanMG/nightgrid.nvim "$NVIM_REPO" 2>/dev/null; then
+    info "cloned           nightgrid.nvim"
+else
+    info "UNAVAILABLE      nightgrid.nvim (clone failed)"
+fi
+if [[ -f "$NVIM_REPO/install.sh" ]]; then
+    info "running its installer (neovim + config -> ~/.config/nvim)..."
+    ( cd "$NVIM_REPO" && bash ./install.sh ) \
+        && info "installed        Neovim config (nightgrid.nvim)" \
+        || info "UNAVAILABLE      nightgrid.nvim installer failed"
 fi
 fi
 

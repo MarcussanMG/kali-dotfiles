@@ -48,6 +48,7 @@ zstyle ':completion:*:warnings'     format '%F{#f87171}󰀦%f %F{#4b5e54}no matc
 zstyle ':completion:*:corrections'  format '%F{#fbbf24}󰁨%f %F{#4b5e54}%d%f'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
+# ─── Complete command flags from their --help / man ───────────────────
 # ─── History ───────────────────────────────────────────────────────────
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
@@ -265,6 +266,21 @@ export BAT_STYLE="header,numbers,grid"
 #  Plugins
 # ═══════════════════════════════════════════════════════════════════════
 
+# fzf-tab: show completions in an fzf picker (searchable, nightgrid colours).
+# Loads after compinit and BEFORE autosuggestions/syntax-highlighting. It only
+# reshapes completions that already exist -- it is not a source of new ones.
+# Installed by bootstrap.sh into $XDG_DATA_HOME/fzf-tab.
+FZF_TAB_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/fzf-tab"
+if [[ -f "$FZF_TAB_HOME/fzf-tab.plugin.zsh" ]]; then
+    source "$FZF_TAB_HOME/fzf-tab.plugin.zsh"
+    zstyle ':completion:*' menu no                 # hand the menu to fzf-tab
+    zstyle ':fzf-tab:*' use-fzf-default-opts yes    # inherit the nightgrid palette
+    zstyle ':fzf-tab:*' prefix ''
+    zstyle ':fzf-tab:*' continuous-trigger '/'      # keep drilling into paths with /
+    zstyle ':fzf-tab:complete:cd:*' fzf-preview \
+        'eza -1 --color=always --icons $realpath 2>/dev/null || ls -1 $realpath'
+fi
+
 [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
     source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#4b5e54'
@@ -425,6 +441,83 @@ if command -v grc >/dev/null; then
     alias traceroute='grc --colour=auto traceroute'
     alias dig='grc --colour=auto dig'
 fi
+
+# grc wraps nmap/ping/dig/traceroute, so zsh would complete "grc" instead of
+# the real tool. Skip grc and its flags and complete the wrapped command.
+_grc() {
+    shift words; (( CURRENT-- ))
+    while [[ ${words[1]} == -* ]]; do shift words; (( CURRENT-- )); done
+    _normal
+}
+compdef _grc grc
+
+# ─── Universal option completion from --help / man ─────────────────────
+# For ANY command without a richer completion of its own, read the program's
+# own help -- trying --help, -h, -help, a `help` subcommand, then the man page
+# -- and offer its flags WITH their descriptions. Handles sub-commands
+# (`gobuster dir`, `nxc smb`, ...). Nothing is hardcoded: every option comes
+# from the tool itself. Cached per command for the session. Non-flag words
+# still complete hosts/files. Shown through fzf-tab like any other completion.
+typeset -gA _help_opts_cache
+_help_opts_awk() {
+awk 'function emit(   j){ if(length(d)>70)d=substr(d,1,69) "…"
+  for(j=1;j<=m;j++) print opt[j] ":" d; m=0 }
+{ raw=$0
+  if (raw ~ /^[[:space:]]*-/) { emit()
+    line=raw; sub(/^[[:space:]]+/,"",line)
+    sp=match(line,/  +/); co=index(line,": ")
+    if (sp>0 && co>0) cut=(sp<co?sp:co); else if (sp>0) cut=sp; else if (co>0) cut=co; else cut=0
+    if (cut>0){ spec=substr(line,1,cut-1); d=substr(line,cut); sub(/^[: ]+/,"",d) } else { spec=line; d="" }
+    sub(/[[:space:]]+$/,"",spec); nw=split(spec,w,/[ ,]+/)
+    for(i=1;i<=nw;i++){ tok=w[i]
+      gsub(/<[^>]*>/,"",tok); gsub(/\[[^]]*\]/,"",tok); sub(/=.*/,"",tok); gsub(/[.:]/,"",tok)
+      if(tok=="")continue; ns=split(tok,ss,"/"); pre=""
+      for(s=1;s<=ns;s++){ o=ss[s]; if(o=="")continue
+        if(o ~ /^--/){pre="--";key=o} else if(o ~ /^-/){pre="-";key=o} else if(pre!=""){key=pre o} else continue
+        if(!(key in seen)){seen[key]=1;opt[++m]=key} } }
+    next }
+  if (m && raw ~ /^[[:space:]]{5,}[^[:space:]-]/){ s=raw; sub(/^[[:space:]]+/,"",s); d=d " " s; next }
+  emit() }
+END{ emit() }'
+}
+_help_opts() {
+    [[ ${words[CURRENT]} == -* ]] || return 1
+    local cmd=${words[1]}
+    [[ -n ${commands[$cmd]} ]] || return 1
+    local -a sub; local w
+    for w in ${words[2,CURRENT-1]}; do
+        [[ $w == [a-z][a-z-]# ]] || break
+        sub+=$w
+    done
+    local key="$cmd ${(j: :)sub}"
+    local -a opts
+    if (( ${+_help_opts_cache[$key]} )); then
+        opts=( ${(f)_help_opts_cache[$key]} )
+    else
+        local h try
+        for try in '--help' '-h' '-help' 'help'; do
+            h="$(timeout 3 "$cmd" ${sub} ${=try} 2>&1 </dev/null)"
+            opts=( ${(f)"$(print -r -- "$h" | _help_opts_awk)"} )
+            (( ${#opts} )) && break
+        done
+        if (( ! ${#opts} )) && (( ${+commands[man]} )); then
+            opts=( ${(f)"$(man "$cmd" 2>/dev/null | col -b 2>/dev/null | _help_opts_awk)"} )
+        fi
+        _help_opts_cache[$key]=${(pj:\n:)opts}
+    fi
+    (( ${#opts} )) || return 1
+    _describe -t options "${cmd} option" opts
+}
+# Hook zsh's _default so EVERY command with no specific completion uses it.
+if (( ! ${+functions[_default_orig]} )); then
+    autoload +X _default 2>/dev/null
+    functions[_default_orig]=$functions[_default]
+    _default() { _help_opts && return 0; _default_orig "$@" }
+fi
+# nmap ships a (stale) bundled completion, so _default won't fire -- force it,
+# keeping host/file completion for the non-flag arguments.
+_nmap_help() { _help_opts && return 0; _alternative 'hosts:host:_hosts' 'files:file:_files' }
+compdef _nmap_help nmap
 
 # target            → print the current target
 # target 10.10.11.5 → set it, export $T, refresh the i3 bar
