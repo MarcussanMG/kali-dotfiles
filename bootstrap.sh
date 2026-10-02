@@ -9,7 +9,23 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 GREEN=$'\e[1;32m'; DIM=$'\e[2;37m'; RESET=$'\e[0m'
-step() { printf '\n%s▸ %s%s\n' "$GREEN" "$1" "$RESET"; }
+# Overall-progress phase header: a solid nightgrid bar + [n/total] across the
+# whole install. STEP_TOTAL is set once the selected components are known.
+STEP_N=0
+step() {
+    STEP_N=$(( STEP_N + 1 ))
+    local total=${STEP_TOTAL:-$STEP_N} width=28 pct filled fbar ebar
+    (( total < STEP_N )) && total=$STEP_N
+    pct=$(( STEP_N * 100 / total )); (( pct > 100 )) && pct=100
+    filled=$(( STEP_N * width / total )); (( filled > width )) && filled=$width
+    fbar="$(printf '%*s' "$filled" '' | tr ' ' '#')"; fbar="${fbar//#/█}"
+    ebar="$(printf '%*s' "$(( width - filled ))" '' | tr ' ' '-')"; ebar="${ebar//-/░}"
+    printf '\n%s▸ %s%s%s%s %3d%%  %s[%d/%d]%s %s%s%s\n' \
+        "$GREEN" "$fbar" "$DIM" "$ebar" "$RESET" "$pct" \
+        "$DIM" "$STEP_N" "$total" "$RESET" "$GREEN" "$1" "$RESET"
+}
+# Plain header for non-phase notices (reports, final message) -- no bar/count.
+header() { printf '\n%s▸ %s%s\n' "$GREEN" "$1" "$RESET"; }
 info() { printf '%s  %s%s\n' "$DIM" "$1" "$RESET"; }
 
 # progress_bar <current> <total> <label> -- redraws a bar in place on a TTY.
@@ -119,6 +135,8 @@ fullscale=,green
     fi
 fi
 info "components -> arsenal:$OPT_ARSENAL seclists:$OPT_SECLISTS notes:$OPT_NOTES postman:$OPT_POSTMAN nvim:$OPT_NVIM"
+# 5 always-on phases (apt update, packages, font, fzf-tab, linking) + selected optionals.
+STEP_TOTAL=$(( 5 + OPT_ARSENAL + OPT_NOTES + OPT_POSTMAN + OPT_NVIM ))
 
 PACKAGES=( "${PKG_CORE[@]}" )
 (( OPT_ARSENAL ))  && PACKAGES+=( "${PKG_ARSENAL[@]}" )
@@ -765,7 +783,7 @@ if [[ ! -L "$HOME/.config/i3/config" ]] || [[ "$(readlink -f "$HOME/.config/i3/c
 fi
 
 if ((${#missing[@]})); then
-    step "Not available in your repositories"
+    header "Not available in your repositories"
     printf '  %s\n' "${missing[@]}"
     info "Everything else installed fine; these are optional."
 fi
@@ -776,7 +794,7 @@ if ((${#missing_core[@]})); then
     printf '       The desktop/shell may not work. Fix these and re-run bootstrap.\n\n'
 fi
 
-step "Bootstrap complete"
+header "Bootstrap complete"
 cat <<'MSG'
 
   1. Log out.
@@ -793,6 +811,6 @@ MSG
 # work by replacing the shell (a 'source' from inside this bash child can't
 # touch your interactive shell). Only on a TTY; skipped when piped (| tee).
 if [[ -t 1 ]] && command -v zsh >/dev/null; then
-    step "Starting zsh with your new configuration"
+    header "Starting zsh with your new configuration"
     exec zsh
 fi
