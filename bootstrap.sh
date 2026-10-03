@@ -289,13 +289,14 @@ else
 fi
 
 # PsExec64 (Sysinternals) -- remote execution / lateral movement. Only that
-# one binary is pulled out of the official PSTools.zip, into ad-exploitation.
-if [[ ! -f "$TOOLS/ad-exploitation/PsExec64.exe" ]]; then
+# one binary is pulled out of the official PSTools.zip, into ad-exploitation/lateral-movement.
+mkdir -p "$TOOLS/ad-exploitation/lateral-movement"
+if [[ ! -f "$TOOLS/ad-exploitation/lateral-movement/PsExec64.exe" ]]; then
     TMPZIP="$(mktemp --suffix=.zip)"
     if curl -fsSL "https://download.sysinternals.com/files/PSTools.zip" -o "$TMPZIP"; then
-        unzip -oqj "$TMPZIP" "PsExec64.exe" -d "$TOOLS/ad-exploitation" 2>/dev/null
+        unzip -oqj "$TMPZIP" "PsExec64.exe" -d "$TOOLS/ad-exploitation/lateral-movement" 2>/dev/null
         rm -f "$TMPZIP"
-        if [[ -f "$TOOLS/ad-exploitation/PsExec64.exe" ]]; then
+        if [[ -f "$TOOLS/ad-exploitation/lateral-movement/PsExec64.exe" ]]; then
             info "downloaded       PsExec64.exe (official Sysinternals)"
         else
             info "UNAVAILABLE      PsExec64.exe"; missing+=("PsExec64")
