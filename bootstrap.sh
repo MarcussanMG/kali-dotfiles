@@ -288,6 +288,25 @@ else
     info "already present  accesschk"
 fi
 
+# PsExec64 (Sysinternals) -- remote execution / lateral movement. Only that
+# one binary is pulled out of the official PSTools.zip, into ad-exploitation.
+if [[ ! -f "$TOOLS/ad-exploitation/PsExec64.exe" ]]; then
+    TMPZIP="$(mktemp --suffix=.zip)"
+    if curl -fsSL "https://download.sysinternals.com/files/PSTools.zip" -o "$TMPZIP"; then
+        unzip -oqj "$TMPZIP" "PsExec64.exe" -d "$TOOLS/ad-exploitation" 2>/dev/null
+        rm -f "$TMPZIP"
+        if [[ -f "$TOOLS/ad-exploitation/PsExec64.exe" ]]; then
+            info "downloaded       PsExec64.exe (official Sysinternals)"
+        else
+            info "UNAVAILABLE      PsExec64.exe"; missing+=("PsExec64")
+        fi
+    else
+        info "UNAVAILABLE      PsExec64.exe"; missing+=("PsExec64")
+    fi
+else
+    info "already present  PsExec64.exe"
+fi
+
 mkdir -p "$TOOLS/privesc/windows/ghostpack"
 for bin in Rubeus.exe SharpUp.exe Seatbelt.exe; do
     if [[ ! -f "$TOOLS/privesc/windows/ghostpack/$bin" ]]; then
