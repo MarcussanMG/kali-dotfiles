@@ -784,6 +784,16 @@ if [[ -f "$NVIM_REPO/install.sh" ]]; then
         && info "installed        Neovim config (nightgrid.nvim)" \
         || info "UNAVAILABLE      nightgrid.nvim installer failed"
     if command -v nvim >/dev/null; then
+        # Let sudo find nvim: symlink the real binary into /usr/bin, which is
+        # always in sudo's secure_path. nightgrid.nvim installs it under
+        # /opt/nvim and only links /usr/local/bin, which Kali's secure_path
+        # may exclude -- so `sudo nvim` breaks without this.
+        if [[ ! -x /usr/bin/nvim ]]; then
+            NVIM_BIN="$(readlink -f "$(command -v nvim)" 2>/dev/null || true)"
+            if [[ -n "$NVIM_BIN" ]] && sudo ln -sf "$NVIM_BIN" /usr/bin/nvim 2>/dev/null; then
+                info "linked           nvim into /usr/bin (so sudo nvim works)"
+            fi
+        fi
         info "syncing Neovim plugins (headless Lazy sync)..."
         nvim --headless "+Lazy! sync" +qa >/dev/null 2>&1 || true
         # LSP servers install themselves on first launch
