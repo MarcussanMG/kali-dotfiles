@@ -539,8 +539,27 @@ target() {
 # mkt box → scaffold ~/engagements/box/{nmap,web,loot,exploits,notes.md}
 mkt() {
     local root="$HOME/engagements/${1:?usage: mkt <name>}"
-    mkdir -p "$root"/{nmap,web,loot,exploits}
+    local tools="$HOME/tools"
+
+    # Fix old architecture: a top-level nmap/ becomes enumeration/nmap/ (moved,
+    # so existing scans are preserved, not duplicated).
+    if [[ -d "$root/nmap" && ! -d "$root/enumeration/nmap" ]]; then
+        mkdir -p "$root/enumeration"
+        mv "$root/nmap" "$root/enumeration/nmap"
+        print -P "%F{#fbbf24}mkt%f: migrated nmap/ -> enumeration/nmap/"
+    fi
+
+    # Ensure the layout exists (mkdir -p is a no-op on existing dirs).
+    mkdir -p "$root"/{web,loot,exploits}
+    mkdir -p "$root/enumeration/nmap"
     mkdir -p "$root"/privesc/{windows,linux}
+
+    # Stage handy enumeration tools into the engagement (copy once, no clobber).
+    [[ -e "$tools/ad-exploitation/enumeration/nxcspray" && ! -e "$root/enumeration/nxcspray" ]] \
+        && cp -r "$tools/ad-exploitation/enumeration/nxcspray" "$root/enumeration/"
+    [[ -e "$tools/recon/kerbrute" && ! -e "$root/enumeration/kerbrute" ]] \
+        && cp -r "$tools/recon/kerbrute" "$root/enumeration/"
+
     [[ -f "$root/notes.md" ]] || printf '# %s\n\n## Enumeration\n\n## Foothold\n\n## Privilege escalation\n\n' "$1" > "$root/notes.md"
     cd "$root"
 }

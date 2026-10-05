@@ -768,8 +768,8 @@ step "Installing Neovim config (nightgrid.nvim)"
 # Clone the Neovim config repo and run ITS installer, which installs a
 # compatible neovim (if needed) plus LSP deps and copies the config into
 # ~/.config/nvim. Non-fatal: the workstation works without it.
-NVIM_REPO="$HOME/tools/nightgrid.nvim"
-mkdir -p "$HOME/tools"
+NVIM_REPO="${XDG_DATA_HOME:-$HOME/.local/share}/nightgrid.nvim"
+mkdir -p "$(dirname "$NVIM_REPO")"
 if [[ -d "$NVIM_REPO/.git" ]]; then
     git -C "$NVIM_REPO" pull --quiet --ff-only 2>/dev/null \
         && info "updated repo      nightgrid.nvim" || info "repo already present"

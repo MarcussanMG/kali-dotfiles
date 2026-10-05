@@ -62,7 +62,7 @@ Firefox policies preinstall **FoxyProxy**, **Wappalyzer**, **Dark Reader** and *
 
 ## Neovim
 
-The optional **Neovim config** is [nightgrid.nvim](https://github.com/MarcussanMG/nightgrid.nvim) — a black/green Lua setup (lazy.nvim, LSP, Telescope, dashboard, which-key). When selected in the installer, `bootstrap.sh` clones it to `~/tools/nightgrid.nvim` and runs its own installer, which installs a compatible Neovim if Kali's is too old and copies the config into `~/.config/nvim`.
+The optional **Neovim config** is [nightgrid.nvim](https://github.com/MarcussanMG/nightgrid.nvim) — a black/green Lua setup (lazy.nvim, LSP, Telescope, dashboard, which-key). When selected in the installer, `bootstrap.sh` clones it to `~/.local/share/nightgrid.nvim` and runs its own installer, which installs a compatible Neovim if Kali's is too old and copies the config into `~/.config/nvim`.
 
 ## Keyboard shortcuts
 
@@ -126,7 +126,7 @@ Mouse support is on: click to select panes, drag borders to resize, scroll to en
 |---|---|
 | `target [IP]` | Set (or print) the engagement target. Shown in every prompt and exported as `$T`, shared across all tabs. |
 | `cleartarget` | Clear the target. |
-| `mkt <box>` | Scaffold `~/engagements/<box>/` (`nmap/ web/ loot/ exploits/ privesc/{windows,linux}/ notes.md`). |
+| `mkt <box>` | Scaffold `~/engagements/<box>/` (`enumeration/nmap/ web/ loot/ exploits/ privesc/{windows,linux}/ notes.md`) and stage kerbrute + nxcspray into `enumeration/`. Re-run to migrate an old layout or re-enter the folder. |
 | `extractports <scan.gnmap>` | Extract open ports from an Nmap scan and copy them to the clipboard. |
 | `clearcache [-y]` | Wipe regenerable tool output & caches (penelope/nxc/msf dumps, pip/thumbnail/browser caches, Trash). Keeps loot, creds, the nxc workspace and your target; add paths with `NG_CACHE_EXTRA`. |
 | `tools` | `cd ~/tools`. |
