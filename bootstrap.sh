@@ -77,7 +77,7 @@ PKG_CORE=(
     git curl wget unzip whiptail grc python3-rich
 )
 # Optional package groups, added to the install list only when enabled.
-PKG_ARSENAL=( rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope )
+PKG_ARSENAL=( rlwrap peass powersploit mimikatz sharphound chisel ncat-w32 webshells mitm6 coercer penelope pocl-opencl-icd clinfo )
 PKG_SECLISTS=( seclists )
 PKG_NOTES=( cherrytree )
 
