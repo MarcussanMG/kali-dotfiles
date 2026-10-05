@@ -610,6 +610,47 @@ extractports() {
     fi
 }
 
+# clearcache [-y] -> wipe regenerable tool output + caches (penelope/nxc dumps,
+# msf logs, pip/thumbnail/browser caches, Trash). NEVER touches ~/engagements,
+# cracked creds (john.pot / potfiles), the nxc workspace DB, Burp, or your
+# target. A built-in guard refuses anything that isn't strictly under $HOME.
+# Add your own dirs in ~/.config/ng/local.conf:  NG_CACHE_EXTRA+=( ~/.foo )
+typeset -ga NG_CACHE_DIRS=(
+    "$HOME/.penelope/sessions"
+    "$HOME/.nxc/logs"
+    "$HOME/.nxc/modules"
+    "$HOME/.msf4/logs"
+    "$HOME/.cache/pip"
+    "$HOME/.cache/thumbnails"
+    "$HOME/.cache/mozilla"
+    "$HOME/.cache/chromium"
+    "$HOME/.local/share/Trash"
+)
+clearcache() {
+    local -a all=( "${NG_CACHE_DIRS[@]}" "${NG_CACHE_EXTRA[@]}" )
+    local -a present=()
+    local d r
+    for d in "${all[@]}"; do
+        [[ -n "$d" ]] || continue
+        r=${d:A}                               # absolutise / resolve
+        [[ -e "$r" && "$r" == "$HOME"/?* ]] && present+=("$r")   # only under $HOME
+    done
+    present=(${(u)present})                     # dedupe
+    if (( ! ${#present[@]} )); then
+        print -P "%F{#4b5e54}clearcache: nothing to clean%f"; return 0
+    fi
+    print -P "%F{#fbbf24}clearcache%f will wipe the contents of:"
+    for d in "${present[@]}"; do
+        printf '  %s  \e[2;37m(%s)\e[0m\n' "${d/#$HOME/~}" "$(du -sh "$d" 2>/dev/null | cut -f1)"
+    done
+    if [[ "$1" != "-y" ]]; then
+        print -n "Proceed? [y/N] "; local ans; read -r ans
+        [[ "$ans" == [yY]* ]] || { print -P "%F{#4b5e54}aborted%f"; return 1 }
+    fi
+    for d in "${present[@]}"; do find "$d" -mindepth 1 -delete 2>/dev/null; done
+    print -P "%F{#22c55e}[+] clearcache: done%f"
+}
+
 # Hashcat CPU backend for VMware
 export RUSTICL_ENABLE=llvmpipe
 

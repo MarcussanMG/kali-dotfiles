@@ -9,3 +9,7 @@
 # to the CPU device, which is what works inside a GPU-less VMware guest. On a
 # host with a real GPU, set it empty to let hashcat auto-detect:
 # NG_HASHCAT_OPTS=""
+
+# Extra directories for `clearcache` to wipe (appended to the built-ins).
+# Only paths under $HOME are ever touched. Example:
+# NG_CACHE_EXTRA+=( "$HOME/.local/share/hashcat/sessions" "$HOME/.ZAP" )

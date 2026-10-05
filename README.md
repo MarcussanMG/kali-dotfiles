@@ -128,6 +128,7 @@ Mouse support is on: click to select panes, drag borders to resize, scroll to en
 | `cleartarget` | Clear the target. |
 | `mkt <box>` | Scaffold `~/engagements/<box>/` (`nmap/ web/ loot/ exploits/ privesc/{windows,linux}/ notes.md`). |
 | `extractports <scan.gnmap>` | Extract open ports from an Nmap scan and copy them to the clipboard. |
+| `clearcache [-y]` | Wipe regenerable tool output & caches (penelope/nxc/msf dumps, pip/thumbnail/browser caches, Trash). Keeps loot, creds, the nxc workspace and your target; add paths with `NG_CACHE_EXTRA`. |
 | `tools` | `cd ~/tools`. |
 | `notes` | Open the synced CherryTree reference notes. |
 | `bloodhound up\|down\|creds\|reset` | Manage the BloodHound CE stack. |
