@@ -144,7 +144,10 @@ PACKAGES=( "${PKG_CORE[@]}" )
 (( OPT_NOTES ))    && PACKAGES+=( "${PKG_NOTES[@]}" )
 
 step "Updating package lists"
-sudo apt-get update
+# Non-fatal: a flaky mirror or an expired key must not abort the whole
+# bootstrap before the desktop is even linked. Missing packages are
+# reported by the install loop below.
+sudo apt-get update || true
 
 step "Installing packages"
 # Installed one at a time so a single unavailable package cannot abort the run.
@@ -191,10 +194,13 @@ else
     if { [[ -t 1 ]] && curl -#fL "$url" -o "$tmp/JetBrainsMono.zip"; } \
         || { [[ ! -t 1 ]] && curl -fsSL "$url" -o "$tmp/JetBrainsMono.zip"; }; then
         info "extracting and refreshing the font cache..."
-        unzip -qo "$tmp/JetBrainsMono.zip" -d "$FONT_DIR/JetBrainsMono" \
-            -x "*.txt" "*.md" "LICENSE*"
-        fc-cache -f "$FONT_DIR" >/dev/null
-        printf '  installed       JetBrainsMono Nerd Font\n'
+        if unzip -qo "$tmp/JetBrainsMono.zip" -d "$FONT_DIR/JetBrainsMono" \
+                -x "*.txt" "*.md" "LICENSE*" \
+            && fc-cache -f "$FONT_DIR" >/dev/null; then
+            printf '  installed       JetBrainsMono Nerd Font\n'
+        else
+            info "font install failed — add it later from nerdfonts.com"
+        fi
     else
         info "download failed — install it manually from nerdfonts.com"
     fi
@@ -215,6 +221,21 @@ else
 fi
 
 step "Linking configuration"
+# ── CRITICAL: link the desktop + shell NOW, before any optional,
+# network-dependent work. This is what turns a bare i3 into the
+# nightgrid desktop, so it must run before anything that can fail.
+# Running it here (not at the end) means no failed tool download can
+# ever leave you on the vanilla i3 "first configuration" screen again.
+# install.sh is idempotent and safe to re-run.
+"$DOTFILES/install.sh"
+
+# Everything from here on is optional (tools arsenal, notes, Postman,
+# Neovim). None of it may abort the run or undo the desktop above, so
+# drop errexit and pipefail for the remainder: each item already reports
+# its own success/failure and is skipped cleanly when a download or
+# package is unavailable (apt hiccup, GitHub API rate-limit, etc.).
+set +e
+set +o pipefail
 
 if (( OPT_ARSENAL )); then
 step "Building /tools/ arsenal"
@@ -842,14 +863,12 @@ if [[ -f "$NVIM_REPO/install.sh" ]]; then
 fi
 fi
 
-"$DOTFILES/install.sh"
-
+# Safety net: the desktop was linked early, before the optional work
+# above. Re-verify and self-heal in the unlikely event something
+# disturbed it, so the run can never end on a vanilla i3.
 if [[ ! -L "$HOME/.config/i3/config" ]] || [[ "$(readlink -f "$HOME/.config/i3/config")" != "$(readlink -f "$DOTFILES/i3/config")" ]]; then
-    echo
-    echo "  !!!  i3/config symlink is missing or wrong. install.sh may have been"
-    echo "       interrupted -- run it again manually before logging into i3:"
-    echo "       cd $DOTFILES && ./install.sh"
-    echo
+    header "Re-linking configuration"
+    "$DOTFILES/install.sh" || true
 fi
 
 if ((${#missing[@]})); then
