@@ -512,7 +512,7 @@ if ! command -v netexec >/dev/null && ! command -v nxc >/dev/null; then
 fi
 
 if [[ ! -f "$TOOLS/ad-exploitation/enumeration/nxcspray" ]]; then
-    curl -fsSL "https://raw.githubusercontent.com/NTHSec/nxcspray/main/nxcspray" \
+    curl -fsSL "https://raw.githubusercontent.com/MarcussanMG/nxcspray/main/nxcspray" \
         -o "$TOOLS/ad-exploitation/enumeration/nxcspray" \
         && chmod +x "$TOOLS/ad-exploitation/enumeration/nxcspray" \
         && info "downloaded       nxcspray (needs netexec on PATH)" \
