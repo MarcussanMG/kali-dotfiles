@@ -107,6 +107,50 @@ else
     info "lock screen     will be rendered on first use"
 fi
 
+# --- LightDM login background (blurred wallpaper) ----------------------
+# Same blurred wallpaper as the lock screen, for the lightdm-gtk-greeter.
+# The greeter runs as the lightdm user and cannot read ~/.cache, so the
+# image is rendered into /usr/share/backgrounds (world-readable).
+GREETER_CONF="/etc/lightdm/lightdm-gtk-greeter.conf"
+if [[ -n "$MAGICK" && -f "$WALLPAPER" && -f "$GREETER_CONF" ]]; then
+    GREETER_BG="/usr/share/backgrounds/nightgrid-blur.png"
+    if sudo "$MAGICK" "$WALLPAPER" -blur 0x14 -modulate 70 "$GREETER_BG" 2>/dev/null \
+        && sudo chmod 644 "$GREETER_BG" 2>/dev/null; then
+        if sudo python3 - "$GREETER_CONF" "$GREETER_BG" <<'PY' 2>/dev/null
+import io, re, sys
+p, img = sys.argv[1], sys.argv[2]
+lines = io.open(p, encoding="utf-8").read().splitlines()
+out, done, in_greeter = [], False, False
+for ln in lines:
+    s = ln.strip()
+    if s.startswith("[") and s.endswith("]"):
+        if in_greeter and not done:
+            out.append("background=" + img); done = True
+        in_greeter = (s == "[greeter]")
+        out.append(ln); continue
+    if in_greeter and re.match(r'^\s*#?\s*background\s*=', ln):
+        if not done:
+            out.append("background=" + img); done = True
+        continue
+    out.append(ln)
+if in_greeter and not done:
+    out.append("background=" + img); done = True
+if not done:
+    out += ["[greeter]", "background=" + img]
+io.open(p, "w", encoding="utf-8").write("\n".join(out) + "\n")
+PY
+        then
+            ok "login screen    blurred wallpaper set"
+        else
+            warn "login screen    could not update greeter config"
+        fi
+    else
+        info "login screen    blur render skipped"
+    fi
+else
+    info "login screen    lightdm-gtk-greeter not present -- skipped"
+fi
+
 # ─── Firefox extensions (FoxyProxy, Wappalyzer) ───────────────────────
 FF_POLICY_SRC="$DOTFILES/firefox/policies.json"
 if [[ -f "$FF_POLICY_SRC" ]]; then
