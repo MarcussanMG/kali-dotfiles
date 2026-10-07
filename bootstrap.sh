@@ -531,6 +531,22 @@ else
     info "already present  certipy"
 fi
 
+# bloodyAD -- AD privesc / object & DACL abuse. Installed via pipx like
+# certipy, then symlinked into ad-exploitation for discoverability.
+if ! command -v bloodyAD >/dev/null; then
+    command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
+    pipx install bloodyAD >/dev/null 2>&1 \
+        && info "installed        bloodyAD (via pipx)" \
+        || { info "UNAVAILABLE      bloodyAD"; missing+=("bloodyAD"); }
+else
+    info "already present  bloodyAD"
+fi
+BLOODYAD_BIN="$(command -v bloodyAD 2>/dev/null || true)"
+if [[ -n "$BLOODYAD_BIN" ]]; then
+    ln -sf "$BLOODYAD_BIN" "$TOOLS/ad-exploitation/bloodyAD"
+    info "linked           bloodyAD -> $TOOLS/ad-exploitation/bloodyAD"
+fi
+
 if ! command -v git-dumper >/dev/null; then
     command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
     pipx install git-dumper >/dev/null 2>&1 \

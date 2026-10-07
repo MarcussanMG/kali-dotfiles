@@ -159,7 +159,7 @@ Each Kitty window gets its **own isolated tmux server** (keyed to the shell PID)
 | Reconnaissance | Kerbrute, AutoRecon |
 | Linux privesc | linPEAS, LSE, Linux Exploit Suggester, LinEnum, pspy |
 | Windows privesc | WinPEAS, PowerUp, PrivescCheck, AccessChk, Seatbelt, wesng, PrintSpoofer, GodPotato, JuicyPotato, RoguePotato |
-| Active Directory | Impacket, BloodHound CE + collectors, PowerView, Certipy, netexec, PsExec64 |
+| Active Directory | Impacket, BloodHound CE + collectors, PowerView, Certipy, bloodyAD, netexec, PsExec64 |
 | Shells & payloads | Ncat, Plink, web shells, Penelope |
 | Tunneling & pivoting | Ligolo-ng, Chisel, Socat, proxychains |
 | Exploits | git-dumper, Evil-Macro, AutoBlue-MS17-010 |
