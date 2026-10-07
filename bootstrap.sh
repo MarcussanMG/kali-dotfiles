@@ -576,6 +576,30 @@ if [[ -n "$CERTIPY_BIN" ]]; then
     info "linked           certipy -> $TOOLS/ad-exploitation/certipy"
 fi
 
+# targetedKerberoast -- targeted Kerberoasting. No PyPI package, so clone it
+# with its own venv; that way it carries its own impacket/ldap3 and never
+# depends on the system python. A launcher on PATH runs it: targetedKerberoast
+TK_DIR="$TOOLS/ad-exploitation/kerberos/targetedKerberoast"
+if [[ ! -d "$TK_DIR/.git" ]]; then
+    git clone --quiet https://github.com/ShutdownRepo/targetedKerberoast "$TK_DIR" 2>/dev/null \
+        && info "cloned           targetedKerberoast" \
+        || { info "UNAVAILABLE      targetedKerberoast (clone failed)"; missing+=("targetedKerberoast"); }
+else
+    git -C "$TK_DIR" pull --quiet --ff-only 2>/dev/null && info "updated repo      targetedKerberoast" || true
+fi
+if [[ -f "$TK_DIR/requirements.txt" ]]; then
+    python3 -m venv "$TK_DIR/.venv" >/dev/null 2>&1 || true
+    "$TK_DIR/.venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1 || true
+    if "$TK_DIR/.venv/bin/pip" install -q -r "$TK_DIR/requirements.txt" >/dev/null 2>&1; then
+        mkdir -p "$HOME/.local/bin"
+        printf '#!/usr/bin/env bash\nexec "%s/.venv/bin/python" "%s/targetedKerberoast.py" "$@"\n' "$TK_DIR" "$TK_DIR" > "$HOME/.local/bin/targetedKerberoast"
+        chmod +x "$HOME/.local/bin/targetedKerberoast"
+        info "installed        targetedKerberoast (venv + launcher in ~/.local/bin)"
+    else
+        info "UNAVAILABLE      targetedKerberoast deps"; missing+=("targetedKerberoast-deps")
+    fi
+fi
+
 # -- shells-payloads (webshells from apt, plink official) --
 if [[ -d /usr/share/webshells ]]; then
     ln -sf /usr/share/webshells/php/php-reverse-shell.php "$TOOLS/shells-payloads/php-shell.php"
