@@ -682,7 +682,22 @@ fi
 
 # -- ligolo-ng (proxy for Kali, agents for Windows/Linux targets) --
 mkdir -p "$TOOLS/tunneling-pivoting/ligolo"
-LIGOLO_RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/nicocha30/ligolo-ng/releases/latest)"
+# ligolo: API with retry + release-page fallback (survives GitHub API rate-limit)
+LIGOLO_RELEASE_JSON=""
+for _try in 1 2 3; do
+    LIGOLO_RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/nicocha30/ligolo-ng/releases/latest 2>/dev/null || true)"
+    printf '%s' "$LIGOLO_RELEASE_JSON" | grep -q browser_download_url && break
+    LIGOLO_RELEASE_JSON=""; sleep 3
+done
+if [[ -z "$LIGOLO_RELEASE_JSON" ]]; then
+    # API rate-limited: resolve the real assets from the release page, no API.
+    LIGOLO_TAG="$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/nicocha30/ligolo-ng/releases/latest 2>/dev/null | sed -n 's#.*/tag/##p' || true)"
+    if [[ -n "$LIGOLO_TAG" ]]; then
+        LIGOLO_RELEASE_JSON="$(curl -fsSL "https://github.com/nicocha30/ligolo-ng/releases/expanded_assets/$LIGOLO_TAG" 2>/dev/null \
+            | grep -oE '/nicocha30/ligolo-ng/releases/download/[^"]+' | sort -u \
+            | sed 's#.*#"browser_download_url": "https://github.com&"#' || true)"
+    fi
+fi
 
 LIGOLO_PROXY_URL="$(printf '%s' "$LIGOLO_RELEASE_JSON" | grep browser_download_url | grep -i proxy | grep -i linux | grep -i amd64 | grep -i tar.gz | cut -d '"' -f4)"
 if [[ -n "$LIGOLO_PROXY_URL" && ! -f "$TOOLS/tunneling-pivoting/ligolo/ligolo-proxy" ]]; then
