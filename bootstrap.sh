@@ -579,6 +579,37 @@ fi
 GIT_DUMPER_BIN="$(command -v git-dumper 2>/dev/null || true)"
 [[ -n "$GIT_DUMPER_BIN" ]] && { mkdir -p "$TOOLS/exploits/web"; ln -sf "$GIT_DUMPER_BIN" "$TOOLS/exploits/web/git-dumper" || true; }
 
+# gitleaks -- secret scanner (single Go binary). Installed to /usr/local/bin so
+# it is on PATH, and symlinked next to git-dumper in exploits/web. Robust
+# release resolution (API + release-page fallback) like ligolo.
+if command -v gitleaks >/dev/null; then
+    info "already present  gitleaks"
+else
+    GL_JSON="$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest 2>/dev/null || true)"
+    if ! printf '%s' "$GL_JSON" | grep -q browser_download_url; then
+        GL_TAG="$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/gitleaks/gitleaks/releases/latest 2>/dev/null | sed -n 's#.*/tag/##p' || true)"
+        [[ -n "$GL_TAG" ]] && GL_JSON="$(curl -fsSL "https://github.com/gitleaks/gitleaks/releases/expanded_assets/$GL_TAG" 2>/dev/null \
+            | grep -oE '/gitleaks/gitleaks/releases/download/[^"]+' | sort -u \
+            | sed 's#.*#"browser_download_url": "https://github.com&"#' || true)"
+    fi
+    GL_URL="$(printf '%s' "$GL_JSON" | grep browser_download_url | grep -i linux | grep -iE 'x64|amd64|x86_64' | grep -iv arm | grep -i 'tar.gz' | cut -d '"' -f4 | head -1)"
+    if [[ -n "$GL_URL" ]]; then
+        GL_TMP="$(mktemp -d)"
+        if curl -fsSL "$GL_URL" -o "$GL_TMP/gitleaks.tar.gz" \
+            && tar -xzf "$GL_TMP/gitleaks.tar.gz" -C "$GL_TMP" gitleaks \
+            && sudo install -m755 "$GL_TMP/gitleaks" /usr/local/bin/gitleaks; then
+            info "installed        gitleaks (-> /usr/local/bin)"
+        else
+            info "UNAVAILABLE      gitleaks (download/install failed)"; missing+=("gitleaks")
+        fi
+        rm -rf "$GL_TMP"
+    else
+        info "UNAVAILABLE      gitleaks (couldn't resolve release asset)"; missing+=("gitleaks")
+    fi
+fi
+GITLEAKS_BIN="$(command -v gitleaks 2>/dev/null || true)"
+[[ -n "$GITLEAKS_BIN" ]] && { mkdir -p "$TOOLS/exploits/web"; ln -sf "$GITLEAKS_BIN" "$TOOLS/exploits/web/gitleaks" || true; }
+
 if ! command -v autorecon >/dev/null; then
     command -v pipx >/dev/null || sudo apt-get install -y pipx >/dev/null 2>&1
     pipx install autorecon >/dev/null 2>&1 \
