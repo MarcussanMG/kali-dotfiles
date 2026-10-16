@@ -19,6 +19,6 @@ if pgrep -x picom >/dev/null 2>&1; then
 else
     rm -f "$flag"
     "$HOME/.local/bin/start-picom"
-    kitty_opacity 0.95
+    kitty_opacity 0.85
     notify-send -u low "nightgrid" "Effects enabled" 2>/dev/null
 fi
