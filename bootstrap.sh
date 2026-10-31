@@ -386,6 +386,36 @@ else
     info "already present  wes.py"
 fi
 
+# JAWS -- Just Another Windows (Enum) Script. Single PowerShell privesc enum file.
+if [[ ! -f "$TOOLS/privesc/windows/jaws-enum.ps1" ]]; then
+    curl -fsSL "https://raw.githubusercontent.com/411Hall/JAWS/master/jaws-enum.ps1" \
+        -o "$TOOLS/privesc/windows/jaws-enum.ps1" \
+        && info "downloaded       jaws-enum.ps1" \
+        || { info "UNAVAILABLE      jaws-enum.ps1"; missing+=("jaws-enum.ps1"); }
+else
+    info "already present  jaws-enum.ps1"
+fi
+
+# Procmon (Sysinternals Process Monitor) -- drop Procmon*.exe on the target to
+# watch file/registry/process activity (DLL hijacking hunting, etc.).
+mkdir -p "$TOOLS/privesc/windows/procmon"
+if [[ ! -f "$TOOLS/privesc/windows/procmon/Procmon64.exe" ]]; then
+    TMPZIP="$(mktemp --suffix=.zip)"
+    if curl -fsSL "https://download.sysinternals.com/files/ProcessMonitor.zip" -o "$TMPZIP"; then
+        unzip -oqj "$TMPZIP" "Procmon.exe" "Procmon64.exe" -d "$TOOLS/privesc/windows/procmon" 2>/dev/null || true
+        rm -f "$TMPZIP"
+        if [[ -f "$TOOLS/privesc/windows/procmon/Procmon64.exe" ]]; then
+            info "downloaded       Procmon (official Sysinternals)"
+        else
+            info "UNAVAILABLE      Procmon"; missing+=("Procmon")
+        fi
+    else
+        info "UNAVAILABLE      Procmon"; missing+=("Procmon")
+    fi
+else
+    info "already present  Procmon"
+fi
+
 # -- linux-privesc (linpeas from apt, lse.sh + les.sh from source) --
 mkdir -p "$TOOLS/privesc/linux"
 if [[ -d /usr/share/peass/linpeas ]]; then
